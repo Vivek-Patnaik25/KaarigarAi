@@ -1,0 +1,57 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --clay-bg: #FDF6EE;
+  --clay-surface: #F5EDE0;
+  --clay-deep: #EDD9C0;
+  --clay-primary: #E8873A;
+  --clay-primary-soft: #F5C49A;
+  --clay-indigo: #3D5A8A;
+  --clay-indigo-soft: #B8C8E8;
+  --clay-success: #6DBF8A;
+  --clay-error: #E87070;
+  --clay-text: #2D2420;
+  --clay-muted: #8C7B6E;
+}
+
+body {
+  margin: 0;
+  background-color: var(--clay-bg);
+  background-image: 
+    radial-gradient(circle at 15% 15%, rgba(232, 135, 58, 0.08) 0%, transparent 40%),
+    radial-gradient(circle at 85% 85%, rgba(61, 90, 138, 0.08) 0%, transparent 45%),
+    linear-gradient(135deg, #FDF6EE 0%, #F7ECDE 100%);
+  background-attachment: fixed;
+  color: var(--clay-text);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  min-height: 100vh;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Nunito', 'Noto Sans Devanagari', sans-serif;
+  font-weight: 700;
+  color: var(--clay-indigo);
+}
+
+/* Custom scrollbars with clay aesthetic */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #F5EDE0;
+  border-radius: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #E8873A;
+  border-radius: 8px;
+  border: 2px solid #F5EDE0;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #D4752A;
+}

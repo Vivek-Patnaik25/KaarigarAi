@@ -1,0 +1,9 @@
+{
+  "MAE_INR": 1335.44,
+  "Median_AE_INR": 469.47,
+  "RMSE_INR": 2728.33,
+  "R2_Score_Log": 0.8753,
+  "MAPE_Percent": 33.52,
+  "Train_Samples": 8648,
+  "Test_Samples": 2162
+}

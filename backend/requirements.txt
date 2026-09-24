@@ -1,0 +1,40 @@
+# Core FastAPI & Server
+fastapi>=0.110.0
+uvicorn[standard]>=0.28.0
+pydantic>=2.6.0
+pydantic-settings>=2.2.0
+python-multipart>=0.0.9
+
+# ML & Numerical Computing (CPU Friendly)
+numpy>=1.26.0
+pandas>=2.2.0
+scikit-learn>=1.4.0
+xgboost>=2.0.3
+joblib>=1.3.2
+scipy>=1.12.0
+
+# Computer Vision & Image Processing
+opencv-python-headless>=4.9.0
+pillow>=10.2.0
+
+# PyTorch & Transformers (CLIP Zero-Shot)
+torch>=2.2.0
+torchvision>=0.17.0
+transformers>=4.38.0
+
+# Audio & Speech-To-Text (Self-Hosted / Faster-Whisper)
+faster-whisper>=1.0.1
+
+# Background Removal (Self-Hosted)
+rembg>=2.0.55
+
+# Cloud LLMs (Groq & Gemini API Free Tiers)
+groq>=0.4.2
+google-generativeai>=0.7.0
+
+# Utilities & Networking
+requests>=2.31.0
+tqdm>=4.66.0
+# Database (MongoDB Atlas & GridFS)
+motor>=3.6.0
+pymongo>=4.9.0

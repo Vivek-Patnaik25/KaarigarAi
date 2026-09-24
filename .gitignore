@@ -1,0 +1,91 @@
+# =========================================================
+# KarigaarAI — Root .gitignore
+# =========================================================
+
+# ─── Excluded Modules (Not Pushing) ───
+flutter/
+backend/notebooks/
+
+# ─── Environment Variables & Secrets ───
+.env
+.env.*
+!.env.example
+backend/.env
+karigaar-web/.env
+
+# ─── Internal Working / Audit Files at Root ───
+/APPReport.md
+/Mongoaudit.md
+/walkthrough.md
+/work.md
+/AUDIT.md
+/Sih_Readiness_audit.md
+
+# ─── Test / Demo Images at Root ───
+/Test_Image.webp
+/Test_Image2.png
+/product_page_*.png
+/shopping.webp
+
+# ─── Large Internal Docs (Not for Public Repo) ───
+DOCS/machineLearningAudit1.md
+DOCS/market_linkage_audit.md
+DOCS/scrappper*.ipynb
+DOCS/walkthrough.md
+
+# ─── Python & Backend ───
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+ENV/
+env.bak/
+venv.bak/
+.pytest_cache/
+.coverage
+htmlcov/
+backend/venv/
+backend/temp/*
+!backend/temp/.gitkeep
+
+# ─── Node.js & Web Frontend ───
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+karigaar-web/node_modules/
+karigaar-web/dist/
+karigaar-web/dist-ssr/
+dist/
+dist-ssr/
+
+# ─── OS and IDE Files ───
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+*.sw?
+
+# ─── Agent / Tool Metadata ───
+.agents/
+
+# ─── Large ML Models & Weights ───
+backend/app/ml/weights/*
+backend/app/models_v2/*
+backend/app/new_models/*
