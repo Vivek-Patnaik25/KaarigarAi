@@ -1,10 +1,4 @@
-import sys
-from pathlib import Path
-sys.path.append(str(Path(__file__).parent.parent))
-
-from scripts.download_models import download_classifier
-download_classifier()
-
+import threading
 import logging
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
@@ -14,6 +8,11 @@ from app.db.mongodb import connect_to_mongo, close_mongo_connection, check_db_he
 from app.routers import ml_router, catalog_router, media_router, product_router, market_router, profile_router
 from app.ml.price_predictor import price_predictor
 from app.ml.classifier import classifier
+
+try:
+    from scripts.download_models import download_classifier
+except ImportError:
+    download_classifier = None
 
 logging.basicConfig(
     level=logging.INFO,
@@ -29,10 +28,11 @@ async def lifespan(app: FastAPI):
     # 1. Connect to MongoDB Atlas
     await connect_to_mongo()
 
-    # 2. ML models (PricePredictor auto-initializes on import)
-    logger.info("ML models initialized.")
+    # 2. Trigger model download in background thread if needed
+    if download_classifier:
+        threading.Thread(target=download_classifier, daemon=True).start()
 
-    logger.info("KaarigarAI ML & Database Backend ready for requests.")
+    logger.info("ML models and persistence layer ready for requests.")
     yield
     
     # Graceful shutdown
