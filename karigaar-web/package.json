@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "language-audit": "node scripts/language-audit.mjs"
   },
   "dependencies": {
     "@phosphor-icons/react": "^2.1.7",

@@ -28,6 +28,7 @@ except Exception as e:
 def remove_background(image_bytes: bytes) -> bytes:
     """
     Remove product background using U²-Net (rembg) and place onto pure clean white studio backdrop.
+    Optimized for high-speed CPU execution by downscaling large originals to 800px max dimension.
     Falls back gracefully to Pillow conversion if rembg is not available.
     """
     if not REMBG_AVAILABLE or rembg_remove is None:
@@ -35,6 +36,12 @@ def remove_background(image_bytes: bytes) -> bytes:
 
     try:
         input_image = Image.open(io.BytesIO(image_bytes)).convert("RGBA")
+
+        # Optimize CPU inference latency by resizing if max dimension exceeds 800px
+        max_dim = 800
+        if max(input_image.size) > max_dim:
+            input_image.thumbnail((max_dim, max_dim), Image.Resampling.LANCZOS)
+
         output = rembg_remove(input_image)  # RGBA with transparent alpha
 
         # Composite onto clean white studio background
@@ -47,7 +54,7 @@ def remove_background(image_bytes: bytes) -> bytes:
 
         final = white_bg.convert("RGB")
         buf = io.BytesIO()
-        final.save(buf, format="JPEG", quality=92)
+        final.save(buf, format="JPEG", quality=90)
         return buf.getvalue()
     except Exception as e:
         logger.warning(f"rembg background removal error: {e}. Falling back to original image bytes.")

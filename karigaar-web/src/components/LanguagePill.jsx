@@ -5,7 +5,7 @@ export default function LanguagePill({ className = '', compact = false }) {
   const { language, setLanguage } = useLanguageStore()
 
   return (
-    <div className={`flex items-center gap-1.5 p-1.5 rounded-2xl bg-clay-surface/80 border border-white/40 shadow-inner ${className}`}>
+    <div className={`flex items-center gap-1 p-1 rounded-md bg-stone-100 border border-stone-200 ${className}`}>
       {SUPPORTED_LANGUAGES.map((lang) => {
         const isSelected = language === lang.code
         return (
@@ -13,10 +13,10 @@ export default function LanguagePill({ className = '', compact = false }) {
             key={lang.code}
             type="button"
             onClick={() => setLanguage(lang.code)}
-            className={`px-3 py-1.5 rounded-xl text-xs font-heading font-bold transition-all duration-200 flex items-center gap-1 ${
+            className={`px-2.5 py-1 rounded text-xs font-medium transition-colors flex items-center gap-1 cursor-pointer ${
               isSelected
-                ? 'bg-clay-primary text-white shadow-md scale-105'
-                : 'text-clay-text/80 hover:bg-clay-deep/50'
+                ? 'bg-white text-stone-900 shadow-2xs border border-stone-200'
+                : 'text-stone-600 hover:text-stone-900 hover:bg-stone-200/60'
             }`}
           >
             <span>{lang.flag}</span>

@@ -1,303 +1,295 @@
 /* ==========================================================================
-   KarigaarAI - Claymorphism Visual System
-   Thick multi-layered shadows, puffy 3D inflated surfaces, soft pastel fills.
+   KarigaarAI — Editorial Component Classes
+   Archive editorial / artisan ledger visual language.
+   Restrained. No gradients. No heavy shadows. No pill buttons.
    ========================================================================== */
 
-/* 1. Base Clay Card */
+/* ── 1. Cards ─────────────────────────────────────────────────────────────── */
+
+/* Base editorial card — thin 0.5px border, white background, 8px radius */
 .clay-card {
-  background: linear-gradient(145deg, #f5ede0, #ede0d4);
-  border-radius: 24px;
-  box-shadow: 8px 8px 20px rgba(166, 134, 100, 0.35),
-              -4px -4px 12px rgba(255, 248, 240, 0.8),
-              inset 2px 2px 6px rgba(255, 255, 255, 0.6);
-  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  background: #FFFFFF;
+  border-radius: 8px;
+  border: 0.5px solid #E7E5E4;
+  box-shadow: 0 1px 2px 0 rgba(28, 25, 23, 0.04);
+  transition: box-shadow var(--transition), border-color var(--transition);
   position: relative;
-  border: 1px solid rgba(255, 255, 255, 0.4);
 }
 
 .clay-card:hover {
-  transform: scale(0.985);
-  box-shadow: 4px 4px 12px rgba(166, 134, 100, 0.4),
-              -2px -2px 8px rgba(255, 248, 240, 0.7),
-              inset 3px 3px 8px rgba(255, 255, 255, 0.5);
+  border-color: #D6D3D1;
+  box-shadow: 0 2px 8px -1px rgba(28, 25, 23, 0.06);
 }
 
-/* Clay Card - Large / Elevated */
+/* Elevated — used for important content, slightly stronger shadow */
 .clay-card-elevated {
-  background: linear-gradient(145deg, #f8f1e7, #ebdccf);
-  border-radius: 32px;
-  box-shadow: 12px 12px 28px rgba(166, 134, 100, 0.4),
-              -6px -6px 16px rgba(255, 248, 240, 0.9),
-              inset 3px 3px 8px rgba(255, 255, 255, 0.7);
-  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
-  border: 1px solid rgba(255, 255, 255, 0.5);
+  background: #FFFFFF;
+  border-radius: 8px;
+  border: 0.5px solid #E7E5E4;
+  box-shadow: 0 4px 16px -2px rgba(28, 25, 23, 0.06), 0 2px 6px -2px rgba(28, 25, 23, 0.03);
 }
 
-/* Clay Card - Selected State */
+/* Selected — orange border accent */
 .clay-card-selected {
-  background: linear-gradient(145deg, #fbe8d5, #f5d4b5) !important;
-  border: 3px solid var(--clay-primary) !important;
-  box-shadow: 6px 6px 16px rgba(232, 135, 58, 0.35),
-              -3px -3px 10px rgba(255, 248, 240, 0.8),
-              inset 2px 2px 8px rgba(255, 255, 255, 0.6) !important;
-  transform: scale(1.01);
+  background: #FFF8F5 !important;
+  border: 1.5px solid #E8762B !important;
+  box-shadow: none !important;
 }
 
-/* Clay Card - Pressed / Inset */
+/* Inset — recessed surface for secondary content */
 .clay-card-inset {
-  background: linear-gradient(145deg, #edd9c0, #e6ceb2);
-  border-radius: 24px;
-  box-shadow: inset 4px 4px 10px rgba(166, 134, 100, 0.45),
-              inset -4px -4px 10px rgba(255, 250, 244, 0.7);
+  background: #FAFAF8;
+  border-radius: 8px;
+  border: 0.5px solid #E7E5E4;
+  box-shadow: none;
 }
 
-/* 2. Clay Buttons */
+
+/* ── 2. Buttons ───────────────────────────────────────────────────────────── */
+
+/* Base button — 8px radius, min 48px height, NO pill */
 .clay-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-family: 'Nunito', 'Noto Sans Devanagari', sans-serif;
-  font-weight: 700;
-  border-radius: 24px;
-  padding: 14px 28px;
-  min-height: 52px;
+  font-family:
+    "Noto Sans", "Noto Sans Devanagari", "Noto Sans Bengali",
+    "Noto Sans Tamil", "Noto Sans Oriya", "Inter", system-ui, sans-serif;
+  font-weight: 500;
+  font-size: 0.95rem;
+  border-radius: 8px;
+  padding: 12px 22px;
+  min-height: 48px;
   cursor: pointer;
-  border: none;
+  border: 0.5px solid transparent;
   outline: none;
   text-decoration: none;
   user-select: none;
-  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: background-color var(--transition), border-color var(--transition),
+              color var(--transition), box-shadow var(--transition);
+  letter-spacing: 0.01em;
+  line-height: 1.4;
+  white-space: nowrap;
 }
 
 .clay-btn:active {
-  transform: scale(0.96);
+  transform: scale(0.98);
 }
 
-.clay-btn:disabled {
-  opacity: 0.55;
+.clay-btn:disabled,
+.clay-btn[aria-disabled="true"] {
+  opacity: 0.45;
   cursor: not-allowed;
   pointer-events: none;
-  transform: none !important;
-  box-shadow: none !important;
 }
 
-/* Primary Button (Saffron) */
+/* Primary CTA — #E8762B orange, white text, 8px radius, min 48px height */
 .clay-btn-primary {
-  background: linear-gradient(145deg, #f29649, #df7829);
+  background: #E8762B;
   color: #FFFFFF;
-  box-shadow: 6px 6px 16px rgba(212, 117, 42, 0.45),
-              -3px -3px 10px rgba(255, 206, 168, 0.7),
-              inset 2px 2px 4px rgba(255, 255, 255, 0.45);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-color: #E8762B;
 }
 
 .clay-btn-primary:hover:not(:disabled) {
-  transform: scale(0.98);
-  box-shadow: 3px 3px 10px rgba(212, 117, 42, 0.5),
-              -2px -2px 6px rgba(255, 206, 168, 0.6),
-              inset 3px 3px 6px rgba(255, 255, 255, 0.4);
-  background: linear-gradient(145deg, #f59f56, #e37e30);
+  background: #D3671F;
+  border-color: #D3671F;
 }
 
-/* Secondary Button (Indigo) */
+/* Secondary — Navy accent button */
 .clay-btn-secondary {
-  background: linear-gradient(145deg, #46679e, #354e78);
+  background: #1B2E6B;
   color: #FFFFFF;
-  box-shadow: 6px 6px 16px rgba(45, 68, 107, 0.45),
-              -3px -3px 10px rgba(184, 200, 232, 0.6),
-              inset 2px 2px 4px rgba(255, 255, 255, 0.35);
-  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-color: #1B2E6B;
 }
 
 .clay-btn-secondary:hover:not(:disabled) {
-  transform: scale(0.98);
-  box-shadow: 3px 3px 10px rgba(45, 68, 107, 0.5),
-              -2px -2px 6px rgba(184, 200, 232, 0.5),
-              inset 3px 3px 6px rgba(255, 255, 255, 0.3);
+  background: #132252;
+  border-color: #132252;
 }
 
-/* Ghost / Surface Button */
+/* Ghost / outline — no fill, 0.5px stone border */
 .clay-btn-ghost {
-  background: linear-gradient(145deg, #f7efe4, #ebdccf);
-  color: var(--clay-indigo);
-  box-shadow: 4px 4px 12px rgba(166, 134, 100, 0.3),
-              -3px -3px 8px rgba(255, 248, 240, 0.75),
-              inset 1px 1px 3px rgba(255, 255, 255, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.5);
+  background: transparent;
+  color: #1C1917;
+  border: 0.5px solid #E7E5E4;
 }
 
 .clay-btn-ghost:hover:not(:disabled) {
-  transform: scale(0.98);
-  box-shadow: 2px 2px 8px rgba(166, 134, 100, 0.35),
-              -1px -1px 5px rgba(255, 248, 240, 0.7),
-              inset 2px 2px 5px rgba(255, 255, 255, 0.5);
-  background: linear-gradient(145deg, #f4e8dc, #e5d4c4);
+  background: #F5F5F4;
+  border-color: #D6D3D1;
 }
 
-/* 3. Clay Badges */
+/* Danger */
+.clay-btn-danger {
+  background: transparent;
+  color: #DC2626;
+  border: 0.5px solid #FECACA;
+}
+
+.clay-btn-danger:hover:not(:disabled) {
+  background: #FEF2F2;
+  border-color: #FCA5A5;
+}
+
+
+/* ── 3. Badges ────────────────────────────────────────────────────────────── */
+
+/* Base badge — small, legible, NOT pill shaped (4px radius) */
 .clay-badge {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 14px;
-  border-radius: 16px;
-  font-family: 'Nunito', 'Noto Sans Devanagari', sans-serif;
-  font-weight: 700;
-  font-size: 0.85rem;
-  letter-spacing: 0.02em;
-  box-shadow: 3px 3px 8px rgba(166, 134, 100, 0.25),
-              -2px -2px 6px rgba(255, 255, 255, 0.7),
-              inset 1px 1px 2px rgba(255, 255, 255, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.4);
+  gap: 5px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-family:
+    "Noto Sans", "Noto Sans Devanagari", "Noto Sans Bengali",
+    "Noto Sans Tamil", "Noto Sans Oriya", "Inter", system-ui, sans-serif;
+  font-weight: 500;
+  font-size: 11px;
+  letter-spacing: 0.03em;
+  border: 1px solid transparent;
+  line-height: 1.4;
 }
 
+/* Status variants */
 .clay-badge-primary {
-  background: linear-gradient(145deg, #fad6b8, #f5c49a);
-  color: #9c4b0c;
+  background: #FEF3C7;
+  color: #92400E;
+  border-color: #FDE68A;
 }
 
 .clay-badge-indigo {
-  background: linear-gradient(145deg, #c7d5f0, #b8c8e8);
-  color: #273d63;
+  background: #F5F5F4;
+  color: #44403C;
+  border-color: #E7E5E4;
 }
 
 .clay-badge-success {
-  background: linear-gradient(145deg, #7ed19c, #63b37f);
-  color: #0d4a23;
+  background: #DCFCE7;
+  color: #15803D;
+  border-color: #BBF7D0;
 }
 
 .clay-badge-muted {
-  background: linear-gradient(145deg, #ece3da, #ded3c8);
-  color: #615347;
+  background: #F5F5F4;
+  color: #78716C;
+  border-color: #E7E5E4;
 }
 
-/* 4. Clay Input & Textarea */
+.clay-badge-error {
+  background: #FEF2F2;
+  color: #DC2626;
+  border-color: #FECACA;
+}
+
+
+/* ── 4. Inputs ────────────────────────────────────────────────────────────── */
+
 .clay-input {
-  background: linear-gradient(145deg, #f0e4d5, #eddccb);
-  border: 2px solid transparent;
-  border-radius: 20px;
-  padding: 14px 18px;
-  color: var(--clay-text);
-  font-family: 'Inter', sans-serif;
-  font-size: 1rem;
-  box-shadow: inset 3px 3px 8px rgba(166, 134, 100, 0.35),
-              inset -2px -2px 6px rgba(255, 255, 255, 0.7);
-  transition: all 0.2s ease;
+  background: #FFFFFF;
+  border: 1px solid #E7E5E4;
+  border-radius: 8px;
+  padding: 11px 14px;
+  color: #1C1917;
+  font-family:
+    "Noto Sans", "Noto Sans Devanagari", "Noto Sans Bengali",
+    "Noto Sans Tamil", "Noto Sans Oriya", "Inter", system-ui, sans-serif;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  transition: border-color var(--transition), box-shadow var(--transition);
   width: 100%;
   outline: none;
+  box-shadow: none;
+}
+
+.clay-input::placeholder {
+  color: #A8A29E;
 }
 
 .clay-input:focus {
-  border-color: var(--clay-primary);
-  background: #f7ebe0;
-  box-shadow: inset 2px 2px 6px rgba(166, 134, 100, 0.25),
-              inset -2px -2px 6px rgba(255, 255, 255, 0.8),
-              0 0 0 3px rgba(232, 135, 58, 0.25);
+  border-color: #B45309;
+  box-shadow: 0 0 0 3px rgba(180, 83, 9, 0.12);
 }
 
-/* 5. Microphone Pulsing Animation for Voice Recording */
-@keyframes saffronPulse {
-  0% {
-    transform: scale(1);
-    box-shadow: 0 0 0 0 rgba(232, 135, 58, 0.7),
-                8px 8px 24px rgba(212, 117, 42, 0.45),
-                -4px -4px 14px rgba(255, 206, 168, 0.8);
-  }
-  50% {
-    transform: scale(1.08);
-    box-shadow: 0 0 0 24px rgba(232, 135, 58, 0),
-                12px 12px 32px rgba(212, 117, 42, 0.55),
-                -6px -6px 18px rgba(255, 206, 168, 0.9);
-  }
-  100% {
-    transform: scale(1);
-    box-shadow: 0 0 0 0 rgba(232, 135, 58, 0),
-                8px 8px 24px rgba(212, 117, 42, 0.45),
-                -4px -4px 14px rgba(255, 206, 168, 0.8);
-  }
+.clay-input:disabled {
+  background: #F5F5F4;
+  color: #A8A29E;
+  cursor: not-allowed;
 }
 
-.mic-recording-pulse {
-  animation: saffronPulse 1.5s infinite ease-in-out;
-}
 
-/* 6. Clay Dropzone */
+/* ── 5. Dropzone ──────────────────────────────────────────────────────────── */
+
 .clay-dropzone {
-  background: linear-gradient(145deg, #f7efe4, #ece0d3);
-  border: 2.5px dashed var(--clay-indigo);
-  border-radius: 28px;
-  box-shadow: inset 3px 3px 10px rgba(166, 134, 100, 0.25),
-              inset -3px -3px 8px rgba(255, 250, 244, 0.6),
-              6px 6px 18px rgba(166, 134, 100, 0.2);
-  transition: all 0.25s ease;
+  background: #FAFAF9;
+  border: 1.5px dashed #D6D3D1;
+  border-radius: 10px;
+  transition: border-color var(--transition), background var(--transition);
   cursor: pointer;
 }
 
 .clay-dropzone:hover,
 .clay-dropzone.active {
-  border-color: var(--clay-primary);
-  background: linear-gradient(145deg, #fcf4eb, #f1e4d7);
-  transform: scale(0.99);
+  border-color: #B45309;
+  background: #FFFBEB;
 }
 
-/* 7. Draggable Comparison Slider */
-.comparison-slider-handle {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  background: linear-gradient(145deg, #f29649, #df7829);
-  box-shadow: 4px 4px 12px rgba(212, 117, 42, 0.5),
-              -2px -2px 6px rgba(255, 206, 168, 0.7),
-              inset 2px 2px 4px rgba(255, 255, 255, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  cursor: ew-resize;
-  border: 2px solid white;
+
+/* ── 6. Microphone Recording ──────────────────────────────────────────────── */
+
+@keyframes recordPulse {
+  0%   { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.5); }
+  60%  { box-shadow: 0 0 0 16px rgba(220, 38, 38, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); }
 }
 
-/* 8. Artisan Passport ID Card & Print Styles */
+.mic-recording-pulse {
+  animation: recordPulse 1.4s infinite;
+}
+
+
+/* ── 7. Artisan Passport ──────────────────────────────────────────────────── */
+
 .passport-card {
-  background: linear-gradient(135deg, #FFF9F2 0%, #F5ECE1 50%, #EDE0D0 100%);
-  border-radius: 28px;
-  border: 2px solid rgba(232, 135, 58, 0.4);
-  box-shadow: 12px 14px 32px rgba(166, 134, 100, 0.35),
-              -8px -8px 20px rgba(255, 255, 255, 0.9),
-              inset 2px 2px 8px rgba(255, 255, 255, 0.75);
+  background: #FFFFFF;
+  border-radius: 12px;
+  border: 1px solid #E7E5E4;
+  box-shadow: 0 4px 16px -2px rgba(28, 25, 23, 0.08);
   position: relative;
   overflow: hidden;
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
+/* Amber top accent strip — the only decorative color element */
 .passport-card::before {
   content: '';
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
-  height: 8px;
-  background: linear-gradient(90deg, #E8873A 0%, #F5C49A 30%, #3D5A8A 70%, #273D63 100%);
+  height: 3px;
+  background: #B45309;
 }
 
 .passport-watermark {
   position: absolute;
   right: -20px;
   bottom: -20px;
-  width: 220px;
-  height: 220px;
-  opacity: 0.05;
+  width: 200px;
+  height: 200px;
+  opacity: 0.03;
   pointer-events: none;
   user-select: none;
 }
 
-/* 9. Wholesale Document (B2B Sheet - Clean White Theme) */
+
+/* ── 8. Wholesale / B2B Document ─────────────────────────────────────────── */
+
 .wholesale-doc {
   background-color: #FFFFFF !important;
-  color: #1F2937 !important;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04) !important;
-  border: 1px solid #E5E7EB !important;
-  border-radius: 16px !important;
+  color: #1C1917 !important;
+  box-shadow: 0 1px 4px 0 rgba(28, 25, 23, 0.07) !important;
+  border: 1px solid #E7E5E4 !important;
+  border-radius: 10px !important;
 }
 
 .wholesale-doc table {
@@ -306,29 +298,182 @@
 }
 
 .wholesale-doc th {
-  background-color: #F9FAFB;
-  color: #374151;
+  background-color: #F5F5F4;
+  color: #44403C;
   font-weight: 600;
   text-align: left;
-  padding: 12px 16px;
-  border-bottom: 2px solid #E5E7EB;
-  font-size: 0.875rem;
+  padding: 10px 14px;
+  border-bottom: 1px solid #E7E5E4;
+  font-size: 0.8rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
 }
 
 .wholesale-doc td {
-  padding: 12px 16px;
-  border-bottom: 1px solid #F3F4F6;
-  color: #1F2937;
-  font-size: 0.925rem;
+  padding: 10px 14px;
+  border-bottom: 1px solid #F5F5F4;
+  color: #1C1917;
+  font-size: 0.9rem;
 }
 
 .wholesale-doc tr:last-child td {
   border-bottom: none;
 }
 
-/* 10. Print Mode Optimizations */
+
+/* ── 9. Market Opportunity Match Dots ────────────────────────────────────── */
+
+.match-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.match-dot-strong { background: #15803D; }
+.match-dot-good   { background: #B45309; }
+.match-dot-low    { background: #A8A29E; }
+
+
+/* ── 10. Pipeline / Processing Stages ───────────────────────────────────── */
+
+.pipeline-stage {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  border-bottom: 1px solid #F5F5F4;
+}
+
+.pipeline-stage:last-child { border-bottom: none; }
+
+.pipeline-stage-num {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  flex-shrink: 0;
+  font-family: "IBM Plex Mono", monospace;
+}
+
+.pipeline-stage-num.pending  { background: #F5F5F4; color: #A8A29E; border: 1px solid #E7E5E4; }
+.pipeline-stage-num.active   { background: #1C1917; color: #FFFFFF; }
+.pipeline-stage-num.complete { background: #15803D; color: #FFFFFF; }
+.pipeline-stage-num.error    { background: #DC2626; color: #FFFFFF; }
+
+
+/* ── 11. Step Indicator (Add Product Flow) ───────────────────────────────── */
+
+.step-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+
+.step-dot {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  flex-shrink: 0;
+  font-family: "IBM Plex Mono", monospace;
+  transition: background var(--transition), color var(--transition);
+}
+
+.step-dot.inactive { background: #F5F5F4; color: #A8A29E; border: 1px solid #E7E5E4; }
+.step-dot.active   { background: #1C1917; color: #FFFFFF; }
+.step-dot.done     { background: #15803D; color: #FFFFFF; }
+
+.step-line {
+  flex: 1;
+  height: 1px;
+  background: #E7E5E4;
+  min-width: 20px;
+}
+
+.step-line.done { background: #15803D; }
+
+
+/* ── 12. Navbar ─────────────────────────────────────────────────────────── */
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 14px;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #E2E8F0;
+  text-decoration: none;
+  transition: color var(--transition), background var(--transition);
+}
+
+.nav-link:hover {
+  color: #FFFFFF;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.nav-link.active {
+  color: #FFFFFF;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.22);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+}
+
+
+/* ── 13. Toast / Snackbar ────────────────────────────────────────────────── */
+
+.toast {
+  position: fixed;
+  bottom: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  background: #1B2E6B;
+  color: #FFFFFF;
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  box-shadow: 0 4px 16px rgba(27, 46, 107, 0.35);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: calc(100vw - 2rem);
+}
+
+
+/* ── 14. Utility: Price Typography ──────────────────────────────────────── */
+
+.price-display {
+  font-family: "IBM Plex Mono", "Fira Code", monospace;
+  color: #15803D;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.section-label {
+  font-size: 11px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: #1B2E6B;
+  font-weight: 600;
+}
+
+
+/* ── 15. Print ────────────────────────────────────────────────────────────── */
+
 @media print {
-  /* Hide non-printable UI elements */
   nav, header, footer, #passport-actions, #wholesale-actions, .no-print {
     display: none !important;
   }
@@ -336,23 +481,10 @@
   body {
     background: #FFFFFF !important;
     color: #000000 !important;
-    padding: 0 !important;
-    margin: 0 !important;
-  }
-
-  /* Make sure the passport card prints isolated and high quality */
-  .passport-print-container {
-    padding: 0 !important;
-    margin: 0 auto !important;
-    box-shadow: none !important;
-    background: transparent !important;
-    max-width: 100% !important;
   }
 
   .passport-card {
-    box-shadow: 0 0 0 1px #D1D5DB !important;
-    margin: 0 auto !important;
-    page-break-inside: avoid !important;
+    box-shadow: 0 0 0 1px #E7E5E4 !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
@@ -360,12 +492,110 @@
   .wholesale-doc {
     box-shadow: none !important;
     border: none !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    width: 100% !important;
-    page-break-inside: avoid !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
 }
 
+
+/* ── 16. Demo Banner ────────────────────────────────────────────────────── */
+
+.demo-banner {
+  background: #1C1917;
+  color: #A8A29E;
+  font-size: 12px;
+  text-align: center;
+  padding: 6px 16px;
+  letter-spacing: 0.03em;
+}
+
+.demo-banner strong {
+  color: #F5F5F4;
+  font-weight: 500;
+}
+
+
+/* ── 17. Mobile bottom nav ──────────────────────────────────────────────── */
+
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 40;
+  background: #1C1917;
+  border-top: 1px solid #292524;
+  display: flex;
+  align-items: stretch;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.bottom-nav-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 10px 4px;
+  color: #78716C;
+  text-decoration: none;
+  min-height: 56px;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  transition: color var(--transition);
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+
+.bottom-nav-item.active {
+  color: #FAFAF9;
+}
+
+.bottom-nav-item:hover {
+  color: #D6D3D1;
+}
+
+/* Amber underline on active bottom nav item */
+.bottom-nav-item.active::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  width: 24px;
+  height: 2px;
+  background: #B45309;
+  border-radius: 0 0 2px 2px;
+}
+
+.bottom-nav-item {
+  position: relative;
+}
+
+
+/* ── 18. Animations ─────────────────────────────────────────────────────── */
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fadeIn { animation: fadeIn 0.2s ease forwards; }
+
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    #F5F5F4 25%,
+    #EEEDED 50%,
+    #F5F5F4 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+  border-radius: 6px;
+}

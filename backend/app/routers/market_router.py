@@ -1,6 +1,6 @@
 import logging
 from typing import Optional, List
-from fastapi import APIRouter, HTTPException, Query, Body
+from fastapi import APIRouter, HTTPException, Query, Body, BackgroundTasks
 from app.core.responses import ApiResponse
 from app.models.schemas import (
     MarketMatchRequest,
@@ -9,6 +9,7 @@ from app.models.schemas import (
     DemoInquiryResponse,
 )
 from app.services.market_service import market_service
+from app.services.whatsapp_service import whatsapp_service
 
 logger = logging.getLogger("MarketRouter")
 router = APIRouter(prefix="/market", tags=["Market Linkage"])
@@ -56,13 +57,20 @@ async def get_buyer_details(buyer_id: str):
     return ApiResponse.ok(buyer)
 
 @router.post("/inquiries", summary="Create a demo supply inquiry for a matched opportunity")
-async def create_inquiry(payload: DemoInquiryRequest):
+async def create_inquiry(payload: DemoInquiryRequest, background_tasks: BackgroundTasks):
     """
     Creates a simulated demo inquiry in MongoDB for tracking artisan interest.
-    Explicitly marked with demo_data: True.
+    Dispatches non-blocking WhatsApp alert to the artisan via UltraMsg.
     """
     try:
         inquiry_res = await market_service.create_demo_inquiry(payload)
+        
+        # Non-blocking real-time WhatsApp notification
+        background_tasks.add_task(
+            whatsapp_service.send_inquiry_notification,
+            payload.model_dump()
+        )
+        
         return ApiResponse.ok(inquiry_res.model_dump())
     except Exception as e:
         logger.error(f"Failed to create demo inquiry: {e}")

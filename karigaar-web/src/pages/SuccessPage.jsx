@@ -1,26 +1,23 @@
 import React, { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { motion } from 'framer-motion'
-import confetti from 'canvas-confetti'
 import {
-  ShareNetwork,
+  ArrowSquareOut,
+  CopySimple,
+  Check,
   PlusCircle,
   House,
-  Storefront,
-  Check,
-  CopySimple,
-  IdentificationBadge,
-  FileText,
-  ArrowSquareOut
+  WhatsappLogo,
 } from '@phosphor-icons/react'
 import { useCatalogStore } from '../store/catalogStore'
-import ClayCard from '../components/ClayCard'
-import ClayButton from '../components/ClayButton'
 
 export default function SuccessPage() {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const location = useLocation()
+  const navState = location.state || {}
+
   const {
     title,
     price,
@@ -28,58 +25,24 @@ export default function SuccessPage() {
     imagePreview,
     publishedProductId,
     publishedPublicUrl,
-    reset
+    reset,
   } = useCatalogStore()
-  
+
   const [copied, setCopied] = useState(false)
 
-  const activeProductId = publishedProductId || 'KRG-LIVE'
-  const activePublicUrl = publishedPublicUrl || `${window.location.origin}/p/${activeProductId}`
+  const activeProductId = navState.product_id || publishedProductId || 'KRG-LIVE'
+  const activePublicUrl = navState.public_url || publishedPublicUrl || `${window.location.origin}/p/${activeProductId}`
+  const activeTitle = navState.title || title || t('screen.published_product_alt', 'Your product')
+  const activePrice = navState.price !== undefined && navState.price !== null && Number(navState.price) > 0
+    ? Number(navState.price)
+    : (Number(price) || 0)
 
-  useEffect(() => {
-    // Festive Saffron + Indigo Confetti Burst
-    const end = Date.now() + 1.2 * 1000
-    const colors = ['#E8873A', '#3D5A8A', '#F5C49A', '#6DBF8A', '#FFFFFF']
-
-    const frame = () => {
-      confetti({
-        particleCount: 4,
-        angle: 60,
-        spread: 55,
-        origin: { x: 0, y: 0.7 },
-        colors: colors,
-      })
-      confetti({
-        particleCount: 4,
-        angle: 120,
-        spread: 55,
-        origin: { x: 1, y: 0.7 },
-        colors: colors,
-      })
-
-      if (Date.now() < end) {
-        requestAnimationFrame(frame)
-      }
-    }
-    frame()
-  }, [])
-
-  const handleShare = async () => {
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: title || 'हस्तनिर्मित शिल्प — KarigaarAI',
-          text: `कारीगर AI पर नया उत्पाद प्रकाशित हुआ: ${title || 'पारंपरिक हस्तशिल्प'} ₹${price}`,
-          url: activePublicUrl,
-        })
-      } catch (err) {
-        // user canceled
-      }
-    } else {
-      await navigator.clipboard.writeText(activePublicUrl)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2500)
-    }
+  const backendBase = (import.meta.env.VITE_API_URL || 'http://localhost:8000').replace(/\/$/, '')
+  let displayImage = navState.image || enhancedImageUrl || imagePreview || null
+  if (displayImage && (displayImage.startsWith('/v1/media/') || displayImage.startsWith('v1/media/'))) {
+    displayImage = `${backendBase}/${displayImage.replace(/^\//, '')}`
+  } else if (displayImage && (displayImage.startsWith('/temp/') || displayImage.startsWith('temp/'))) {
+    displayImage = `${backendBase}/${displayImage.replace(/^\//, '')}`
   }
 
   const handleCopyLink = async () => {
@@ -92,133 +55,145 @@ export default function SuccessPage() {
     }
   }
 
-  const handleAddNew = () => {
-    reset()
-    navigate('/catalog')
+  const handleShare = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: activeTitle,
+          text: `${activeTitle} — ₹${activePrice}`,
+          url: activePublicUrl,
+        })
+      } catch (err) { /* user cancelled */ }
+    } else {
+      handleCopyLink()
+    }
   }
 
-  const backendBase = (import.meta.env.VITE_API_URL || 'http://localhost:8000').replace(/\/$/, '')
-  let displayImage = enhancedImageUrl || imagePreview || '/demo/enhanced_pottery.jpg'
-  if (displayImage.startsWith('/v1/media/') || displayImage.startsWith('v1/media/')) {
-    displayImage = `${backendBase}/${displayImage.replace(/^\//, '')}`
-  } else if (displayImage.startsWith('/temp/') || displayImage.startsWith('temp/')) {
-    displayImage = `${backendBase}/${displayImage.replace(/^\//, '')}`
-  }
+  const whatsappText = encodeURIComponent(
+    `${activeTitle} — ₹${activePrice}\n${activePublicUrl}`
+  )
+  const whatsappUrl = `https://wa.me/?text=${whatsappText}`
 
   return (
-    <div className="min-h-screen w-full flex flex-col items-center justify-center p-4 sm:p-8 bg-gradient-to-br from-[#273D63] via-[#3D5A8A] to-[#1E2E4B] text-white">
+    <div className="min-h-screen bg-stone-bg flex flex-col items-center justify-center p-4 sm:p-8">
       <motion.div
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.4 }}
-        className="max-w-md w-full flex flex-col items-center text-center gap-5"
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.35 }}
+        className="w-full max-w-sm flex flex-col gap-6"
       >
-        {/* Animated Checkmark SVG */}
-        <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center border-4 border-clay-primary/60 shadow-2xl">
-          <svg
-            width="56"
-            height="56"
-            viewBox="0 0 64 64"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <motion.path
-              d="M16 34L26 44L48 20"
-              stroke="#E8873A"
-              strokeWidth="6"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              initial={{ pathLength: 0 }}
-              animate={{ pathLength: 1 }}
-              transition={{ duration: 0.6, ease: 'easeOut' }}
-            />
-          </svg>
-        </div>
+        {/* ── Success indicator ─────────────────────────────────────────── */}
+        <div className="flex flex-col items-center text-center gap-3">
+          {/* Checkmark */}
+          <div className="w-14 h-14 rounded-full border-2 border-forest flex items-center justify-center bg-forest-faint">
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ delay: 0.15, type: 'spring', stiffness: 300 }}
+            >
+              <Check size={28} weight="bold" className="text-forest" />
+            </motion.div>
+          </div>
 
-        {/* Festive Heading & ID */}
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-black text-white font-heading">
-            {t('publish_success', 'उत्पाद सफलतापूर्वक प्रकाशित हुआ!')}
-          </h1>
-          <p className="text-sm text-amber-200/90 mt-1 font-medium">
-            कारीगर AI डिजिटल कैटलॉग में स्थायी रूप से सहेज दिया गया है
-          </p>
-          <div className="inline-block mt-2 px-3.5 py-1 rounded-full bg-white/15 text-amber-200 text-xs font-mono font-bold border border-white/20">
-            ID: {activeProductId}
+          <div>
+            <h1 className="text-xl font-semibold text-ink">
+              {t('publish_success', 'Product published')}
+            </h1>
+            <p className="text-sm text-ink-muted mt-0.5">
+              {t('screen.published_saved', 'Your product is now live and visible to buyers.')}
+            </p>
           </div>
         </div>
 
-        {/* Product Thumbnail + Title Card (white clay card) */}
-        <div className="w-full p-4 rounded-3xl bg-white text-clay-text shadow-2xl flex items-center gap-4 border border-white/80">
-          <div className="w-18 h-18 sm:w-20 sm:h-20 rounded-2xl overflow-hidden bg-clay-surface shadow-inner shrink-0">
-            <img
-              src={displayImage}
-              alt="Published product"
-              className="w-full h-full object-cover"
-              onError={(e) => { e.currentTarget.src = '/demo/enhanced_pottery.jpg' }}
-            />
-          </div>
-          <div className="text-left flex-1 min-w-0">
-            <span className="text-[11px] font-black uppercase text-clay-primary tracking-wider block">
-              सक्रिय डिजिटल कैटलॉग (Live)
-            </span>
-            <h3 className="text-sm sm:text-base font-bold text-clay-indigo font-heading truncate">
-              {title || 'हस्तनिर्मित शिल्प उत्पाद'}
-            </h3>
-            <span className="text-lg font-black text-clay-primary">
-              ₹{Number(price || 1939).toLocaleString('en-IN')}
-            </span>
+        {/* ── Product summary card ─────────────────────────────────────── */}
+        <div className="clay-card overflow-hidden">
+          {/* Image strip */}
+          {displayImage && (
+            <div className="w-full h-40 bg-stone-surface overflow-hidden">
+              <img
+                src={displayImage}
+                alt={activeTitle}
+                className="w-full h-full object-cover"
+                onError={(e) => { e.currentTarget.parentElement.style.display = 'none' }}
+              />
+            </div>
+          )}
+
+          <div className="p-4 flex flex-col gap-1">
+            <span className="section-label">{t('screen.active_catalog', 'Published')}</span>
+            <h2 className="text-base font-medium text-ink leading-snug">
+              {activeTitle}
+            </h2>
+            <p className="price-display text-xl mt-1">
+              ₹{Number(activePrice).toLocaleString('en-IN')}
+            </p>
+            <p className="text-xs text-ink-faint font-mono mt-1">
+              ID: {activeProductId}
+            </p>
           </div>
         </div>
 
-        {/* Action Buttons */}
-        <div className="w-full flex flex-col gap-2.5">
-          {/* 1. View Public Listing */}
-          <ClayButton
-            variant="primary"
-            size="lg"
-            fullWidth
-            onClick={() => navigate(`/p/${activeProductId}`)}
-            icon={<ArrowSquareOut size={20} weight="bold" />}
-          >
-            लाइव उत्पाद देखें (View Live Listing)
-          </ClayButton>
-
-          {/* 2. Copy Link / Share */}
-          <ClayButton
-            variant="ghost"
-            size="lg"
-            fullWidth
-            onClick={handleCopyLink}
-            icon={copied ? <Check size={20} weight="bold" /> : <CopySimple size={20} weight="bold" />}
-            className="bg-white/10 hover:bg-white/20 text-white border-white/30"
-          >
-            {copied ? 'लिंक कॉपी हो गया!' : 'पब्लिक लिंक कॉपी करें (Copy Link)'}
-          </ClayButton>
-
-          {/* 3. Add Another Product */}
-          <ClayButton
-            variant="ghost"
-            size="lg"
-            fullWidth
-            onClick={handleAddNew}
-            icon={<PlusCircle size={20} weight="bold" />}
-            className="bg-white/10 hover:bg-white/20 text-white border-white/30"
-          >
-            {t('add_another', 'नया उत्पाद जोड़ें')}
-          </ClayButton>
-
-          {/* 4. Back to Dashboard / My Listings */}
+        {/* ── Actions ──────────────────────────────────────────────────── */}
+        <div className="flex flex-col gap-2.5">
+          {/* Primary: View live page */}
           <button
             type="button"
-            onClick={() => {
-              reset()
-              navigate('/dashboard')
-            }}
-            className="text-sm font-bold text-amber-200/90 hover:text-white flex items-center justify-center gap-1.5 mt-2 transition-colors cursor-pointer"
+            onClick={() => navigate(`/p/${activeProductId}`)}
+            className="clay-btn clay-btn-primary w-full flex items-center justify-center gap-2"
           >
-            <House size={18} />
-            <span>माई लिस्टिंग्स / डैशबोर्ड पर जाएं (My Listings)</span>
+            <ArrowSquareOut size={17} weight="bold" />
+            {t('screen.view_live', 'View published page')}
+          </button>
+
+          {/* WhatsApp share — actual WA action, WA green */}
+          <a
+            href={whatsappUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="clay-btn w-full flex items-center justify-center gap-2 text-white"
+            style={{
+              background: '#25D366',
+              borderColor: '#25D366',
+              borderRadius: '8px',
+              minHeight: '44px',
+              fontWeight: 500,
+              fontSize: '14px',
+            }}
+          >
+            <WhatsappLogo size={18} weight="fill" />
+            {t('screen.share_whatsapp', 'Share on WhatsApp')}
+          </a>
+
+          {/* Copy link */}
+          <button
+            type="button"
+            onClick={handleCopyLink}
+            className="clay-btn clay-btn-ghost w-full flex items-center justify-center gap-2"
+          >
+            {copied
+              ? <><Check size={16} weight="bold" className="text-forest" /> {t('screen.share_copied', 'Copied!')}</>
+              : <><CopySimple size={16} /> {t('screen.copy_public_link', 'Copy product link')}</>
+            }
+          </button>
+
+          {/* Add another */}
+          <button
+            type="button"
+            onClick={() => { reset(); navigate('/catalog?new=true') }}
+            className="clay-btn clay-btn-ghost w-full flex items-center justify-center gap-2"
+          >
+            <PlusCircle size={16} />
+            {t('add_another', 'Add another product')}
+          </button>
+
+          {/* Back to dashboard — text link */}
+          <button
+            type="button"
+            onClick={() => { reset(); navigate('/dashboard') }}
+            className="text-sm text-ink-muted hover:text-ink flex items-center justify-center gap-1.5 mt-1 transition-colors"
+          >
+            <House size={15} />
+            {t('screen.my_listings_dashboard', 'Back to dashboard')}
           </button>
         </div>
       </motion.div>

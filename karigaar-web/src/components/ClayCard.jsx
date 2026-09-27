@@ -1,8 +1,13 @@
 import React from 'react'
 
+/**
+ * EditorialCard — replaces ClayCard
+ * Keeps the same prop API so all existing JSX works unchanged.
+ * variant: 'default' | 'elevated' | 'selected' | 'inset'
+ */
 export default function ClayCard({
   children,
-  variant = 'default', // 'default' | 'elevated' | 'selected' | 'inset'
+  variant = 'default',
   className = '',
   onClick,
   ...props

@@ -6,8 +6,10 @@ import hi from '../locales/hi.json'
 import or from '../locales/or.json'
 import bn from '../locales/bn.json'
 import ta from '../locales/ta.json'
+import mr from '../locales/mr.json'
+import { DEFAULT_LANGUAGE, getPersistedLanguage } from './language'
 
-const savedLanguage = localStorage.getItem('karigaar_lang') || 'hi'
+const savedLanguage = getPersistedLanguage()
 
 i18n
   .use(initReactI18next)
@@ -18,9 +20,10 @@ i18n
       or: { translation: or },
       bn: { translation: bn },
       ta: { translation: ta },
+      mr: { translation: mr },
     },
     lng: savedLanguage,
-    fallbackLng: 'hi',
+    fallbackLng: DEFAULT_LANGUAGE,
     interpolation: {
       escapeValue: false,
     },

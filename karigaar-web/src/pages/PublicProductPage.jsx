@@ -1,42 +1,50 @@
 import React, { useEffect, useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import {
-  Storefront,
   ArrowLeft,
-  IdentificationBadge,
-  Sparkle,
   ShareNetwork,
   WhatsappLogo,
-  CheckCircle,
-  Tag,
   ShieldCheck,
-  House,
-  CircleNotch,
+  Tag,
   CopySimple,
   Check,
-  Buildings
+  CircleNotch,
+  Storefront,
+  House,
+  Heart,
+  PaperPlaneTilt,
+  MapPin,
+  Clock,
+  Package,
+  ChatText
 } from '@phosphor-icons/react'
 import { fetchProductById } from '../config/api'
 import Navbar from '../components/Navbar'
-import ClayCard from '../components/ClayCard'
-import ClayButton from '../components/ClayButton'
-import ClayBadge from '../components/ClayBadge'
 import GITagBanner from '../components/GITagBanner'
-import MarketOpportunitiesModal from '../components/MarketOpportunitiesModal'
+import BuyerProposalModal from '../components/BuyerProposalModal'
+import { localizedField } from '../config/language'
+import { useLanguageStore } from '../store/languageStore'
+import { useUserStore } from '../store/userStore'
+import { isInShortlist, toggleShortlist } from '../config/auth'
+import { getWhatsAppInquiryUrl, getSmsInquiryUrl, isValidPhoneNumber } from '../config/inquiryMessage'
+import { getLocalizedProduct } from '../config/productsCatalog'
 
 export default function PublicProductPage() {
   const { productId } = useParams()
   const { t } = useTranslation()
+  const { language } = useLanguageStore()
+  const { role } = useUserStore()
   const navigate = useNavigate()
 
   const [product, setProduct] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
-  const [selectedLang, setSelectedLang] = useState('hi') // 'hi' or 'en'
   const [copied, setCopied] = useState(false)
-  const [marketModalOpen, setMarketModalOpen] = useState(false)
+  const [isSaved, setIsSaved] = useState(false)
+  const [proposalModalOpen, setProposalModalOpen] = useState(false)
+  const [toastMessage, setToastMessage] = useState('')
 
   useEffect(() => {
     async function loadProduct() {
@@ -47,316 +55,472 @@ export default function PublicProductPage() {
         const data = await fetchProductById(productId)
         if (data) {
           setProduct(data)
+          setIsSaved(isInShortlist(data.product_id || data.id || productId))
         } else {
-          setError('उत्पाद नहीं मिला। कृपया लिंक की जाँच करें।')
+          setError(t('screen.product_not_found', 'Product not found'))
         }
       } catch (err) {
-        console.error('Failed to load public product:', err)
-        setError(err.message || 'उत्पाद लोड करने में असमर्थ।')
+        setError(err.message || t('screen.product_load_error', 'Failed to load product'))
       } finally {
         setLoading(false)
       }
     }
-
     loadProduct()
-  }, [productId])
+  }, [productId, t])
 
   const handleShare = async () => {
-    const currentUrl = window.location.href
+    const url = window.location.href
     if (navigator.share) {
-      try {
-        await navigator.share({
-          title: product?.title || 'KarigaarAI Product',
-          text: `कारीगर AI पर हस्तशिल्प उत्पाद देखें: ${product?.title} (₹${product?.price})`,
-          url: currentUrl,
-        })
-      } catch (err) {
-        // user dismissed share sheet
-      }
+      try { await navigator.share({ title: product?.title || 'KarigaarAI', url }) } catch (_) {}
     } else {
       try {
-        await navigator.clipboard.writeText(currentUrl)
+        await navigator.clipboard.writeText(url)
         setCopied(true)
         setTimeout(() => setCopied(false), 2500)
-      } catch (e) {
-        console.error('Clipboard copy failed:', e)
-      }
+      } catch (_) {}
     }
   }
 
+  const handleToggleShortlist = () => {
+    if (!product) return
+    const updated = toggleShortlist({
+      ...product,
+      id: product.product_id || product.id || productId,
+      product_id: product.product_id || product.id || productId,
+      title: activeTitle,
+    })
+    const savedNow = isInShortlist(product.product_id || product.id || productId)
+    setIsSaved(savedNow)
+    showToast(savedNow ? t('shortlist.added', 'Added to shortlist') : t('shortlist.removed', 'Removed from shortlist'))
+  }
+
+  const showToast = (msg) => {
+    setToastMessage(msg)
+    setTimeout(() => setToastMessage(''), 2500)
+  }
+
+  /* ── Loading ─────────────────────────────────────────────────────────── */
   if (loading) {
     return (
-      <div className="min-h-screen bg-clay-bg flex flex-col">
+      <div className="min-h-screen bg-stone-bg flex flex-col">
         <Navbar />
-        <div className="flex-1 flex flex-col items-center justify-center p-6 gap-4">
-          <CircleNotch size={48} className="animate-spin text-clay-primary" />
-          <p className="text-sm font-bold text-clay-indigo font-heading">
-            कारीगर AI से उत्पाद लोड हो रहा है...
-          </p>
+        <div className="flex-1 flex items-center justify-center gap-3 text-ink-muted">
+          <CircleNotch size={24} className="animate-spin" />
+          <span className="text-sm">{t('screen.product_loading', 'Loading…')}</span>
         </div>
       </div>
     )
   }
 
+  /* ── Error ───────────────────────────────────────────────────────────── */
   if (error || !product) {
     return (
-      <div className="min-h-screen bg-clay-bg flex flex-col">
+      <div className="min-h-screen bg-stone-bg flex flex-col">
         <Navbar />
-        <div className="flex-1 flex flex-col items-center justify-center p-6 gap-6 max-w-md mx-auto text-center">
-          <div className="w-20 h-20 rounded-full bg-red-100 text-red-500 flex items-center justify-center shadow-inner">
-            <Storefront size={40} weight="fill" />
+        <div className="flex-1 flex flex-col items-center justify-center p-6 gap-5 text-center max-w-sm mx-auto">
+          <div className="w-16 h-16 rounded-full bg-stone-surface flex items-center justify-center">
+            <Storefront size={28} className="text-ink-faint" />
           </div>
-          <h2 className="text-xl font-bold text-clay-indigo font-heading">
-            {error || 'उत्पाद नहीं मिला'}
-          </h2>
-          <p className="text-xs text-clay-muted">
-            हो सकता है कि यह उत्पाद हटा दिया गया हो या इसका स्थायी लिंक बदल गया हो।
-          </p>
-          <ClayButton variant="primary" size="md" onClick={() => navigate('/dashboard')} icon={<House size={18} />}>
-            डैशबोर्ड पर जाएं
-          </ClayButton>
+          <div>
+            <h2 className="text-base font-medium text-ink mb-1">
+              {error || t('screen.product_not_found', 'Product not found')}
+            </h2>
+            <p className="text-sm text-ink-muted">
+              {t('screen.product_removed', 'This product may have been removed or made private.')}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => navigate('/buyer/discover')}
+            className="clay-btn clay-btn-primary flex items-center gap-1.5"
+          >
+            <House size={15} />
+            <span>{t('browse_catalogue', 'Browse Catalogue')}</span>
+          </button>
         </div>
       </div>
     )
   }
 
-  const listing = product.listing || {}
-  const aiMeta = product.ai_metadata || {}
-  const activeTitle = selectedLang === 'hi' ? (listing.title_hi || product.title) : (listing.title_en || product.title)
-  const activeDesc = selectedLang === 'hi' ? (listing.description_hi || product.description) : (listing.description_en || product.description)
+  const localizedProd = getLocalizedProduct(product, language)
+  const listing       = product.listing || {}
+  const activeTitle   = localizedField(listing, 'title', language) || localizedProd.title || product.title || 'Handcrafted Artisan Product'
+  const activeDesc    = localizedField(listing, 'description', language) || localizedProd.description || product.description || ''
+  const activeMat     = localizedField(listing, 'material', language) || localizedProd.material || product.material || ''
+  const activeTech    = localizedField(listing, 'technique', language) || localizedProd.technique || product.technique || ''
+
+  // Category label lookup for i18n
+  const CATEGORY_I18N_KEY = {
+    pottery_terracotta: 'category.pottery',
+    textile_handloom: 'category.handloom',
+    textile_embroidery: 'category.embroidery',
+    woodcraft: 'category.woodcraft',
+    metalcraft: 'category.metalcraft',
+    painting_folk: 'category.painting',
+    jewellery: 'category.jewellery',
+  }
+  const activeCategoryLabel = product.category
+    ? (CATEGORY_I18N_KEY[product.category] ? t(CATEGORY_I18N_KEY[product.category]) : product.category.replace(/_/g, ' '))
+    : null
 
   const backendBase = (import.meta.env.VITE_API_URL || 'http://localhost:8000').replace(/\/$/, '')
-  let imageUrl = product.image_url || '/demo/enhanced_pottery.jpg'
-  if (imageUrl.startsWith('/v1/media/') || imageUrl.startsWith('v1/media/')) {
+  let imageUrl = product.image_url || null
+  if (imageUrl && (imageUrl.startsWith('/v1/media/') || imageUrl.startsWith('v1/media/'))) {
     imageUrl = `${backendBase}/${imageUrl.replace(/^\//, '')}`
-  } else if (imageUrl.startsWith('/temp/') || imageUrl.startsWith('temp/')) {
+  } else if (imageUrl && (imageUrl.startsWith('/temp/') || imageUrl.startsWith('temp/'))) {
     imageUrl = `${backendBase}/${imageUrl.replace(/^\//, '')}`
   }
 
-  const whatsappMessage = encodeURIComponent(
-    `नमस्ते! मैं आपके हस्तनिर्मित उत्पाद "${activeTitle}" (आईडी: ${product.product_id}) को ₹${product.price} में खरीदने के लिए इच्छुक हूँ। कृपया विवरण साझा करें।`
-  )
-  const whatsappUrl = `https://wa.me/?text=${whatsappMessage}`
+  // Direct messaging URLs (WhatsApp & SMS)
+  const rawArtisanPhone = product.artisan_phone || product.phone || (product.artisan_id === 'KG-2024-8921' ? '+919556828397' : '')
+  const hasValidPhone = isValidPhoneNumber(rawArtisanPhone)
+
+  const whatsappUrl = hasValidPhone
+    ? getWhatsAppInquiryUrl({
+        artisanPhone: rawArtisanPhone,
+        artisanName: product.artisan_name,
+        productTitle: activeTitle,
+        quantity: product.moq || 20,
+        productUrl: typeof window !== 'undefined' ? window.location.href : '',
+        language,
+      })
+    : null
+
+  const smsUrl = hasValidPhone
+    ? getSmsInquiryUrl({
+        artisanPhone: rawArtisanPhone,
+        artisanName: product.artisan_name,
+        productTitle: activeTitle,
+        quantity: product.moq || 20,
+        productUrl: typeof window !== 'undefined' ? window.location.href : '',
+        language,
+      })
+    : null
+
+  const artisanId = product.artisan_id || 'KG-2024-8921'
 
   return (
-    <div className="min-h-screen bg-clay-bg flex flex-col pb-16">
+    <div className="min-h-screen bg-stone-bg flex flex-col pb-24">
       <Navbar />
 
-      <main className="max-w-5xl mx-auto w-full px-4 sm:px-6 py-6 flex-1 flex flex-col gap-6">
-        {/* Breadcrumb / Top Bar */}
-        <div className="flex items-center justify-between gap-4">
+      <main className="max-w-4xl mx-auto w-full px-4 sm:px-6 py-6 sm:py-8 flex-1">
+
+        {/* ── Breadcrumb & Top Actions ─────────────────────────────────── */}
+        <div className="flex items-center justify-between mb-6 gap-4">
           <button
             type="button"
-            onClick={() => (window.history.state && window.history.state.idx > 0 ? navigate(-1) : navigate('/dashboard'))}
-            className="flex items-center gap-1.5 text-xs sm:text-sm font-bold text-clay-indigo hover:text-clay-primary transition-colors cursor-pointer"
+            onClick={() => window.history.state?.idx > 0 ? navigate(-1) : navigate(role === 'artisan' ? '/artisan/products' : '/buyer/discover')}
+            className="flex items-center gap-1.5 text-xs sm:text-sm text-ink-muted hover:text-ink transition-colors"
           >
-            <ArrowLeft size={18} weight="bold" />
-            <span>{t('back', 'वापस जाएं (Back)')}</span>
+            <ArrowLeft size={16} weight="bold" />
+            <span>{t('back', 'Back')}</span>
           </button>
 
           <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setMarketModalOpen(true)}
-              className="px-3.5 py-2 rounded-2xl bg-indigo-50 hover:bg-indigo-100 text-indigo-900 font-heading font-bold text-xs flex items-center gap-1.5 border border-indigo-200 shadow-sm transition-all active:scale-95 cursor-pointer"
-            >
-              <Buildings size={16} weight="duotone" className="text-indigo-600" />
-              <span>बाज़ार के अवसर (Market Matches)</span>
-            </button>
+            {/* Shortlist Heart Button (Buyers only) */}
+            {role !== 'artisan' && (
+              <button
+                type="button"
+                onClick={handleToggleShortlist}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded border text-xs font-medium transition-colors shadow-2xs ${
+                  isSaved
+                    ? 'border-rose-300 bg-rose-50 text-rose-600'
+                    : 'border-stone-300 bg-white text-ink hover:bg-stone-50'
+                }`}
+              >
+                <Heart size={15} weight={isSaved ? 'fill' : 'regular'} className={isSaved ? 'text-rose-500' : ''} />
+                <span>{isSaved ? t('saved_label', 'Saved') : t('save_label', 'Save')}</span>
+              </button>
+            )}
 
+            {/* Share link */}
             <button
               type="button"
               onClick={handleShare}
-              className="px-3.5 py-2 rounded-2xl bg-clay-surface hover:bg-clay-deep text-clay-indigo font-heading font-bold text-xs flex items-center gap-1.5 shadow-sm border border-white/60 transition-all active:scale-95 cursor-pointer"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded border border-stone-300 bg-white text-xs text-ink hover:bg-stone-50 transition-colors shadow-2xs cursor-pointer"
             >
-              {copied ? <Check size={16} weight="bold" className="text-emerald-600" /> : <ShareNetwork size={16} weight="bold" />}
-              <span>{copied ? 'लिंक कॉपी हो गया!' : 'शेयर करें (Share)'}</span>
+              {copied
+                ? <><Check size={14} weight="bold" className="text-forest" /> {t('screen.share_copied', 'Copied')}</>
+                : <><ShareNetwork size={14} /> {t('screen.share', 'Share')}</>
+              }
             </button>
-
-            <Link
-              to={`/passport/${product.artisan_id || 'KG-2024-8921'}`}
-              className="px-3.5 py-2 rounded-2xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-900 font-heading font-bold text-xs flex items-center gap-1.5 border border-amber-500/30 transition-all active:scale-95"
-            >
-              <IdentificationBadge size={16} weight="fill" className="text-amber-600" />
-              <span>कारीगर पासपोर्ट</span>
-            </Link>
           </div>
         </div>
 
-        {/* GI Tag Contextual Awareness Banner */}
+        {/* ── GI Tag Banner ────────────────────────────────────────────── */}
         <GITagBanner category={product.category} />
 
-        {/* Main Product Showcase Card */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 items-start">
-          {/* Left Column: Enhanced Studio Image Showcase */}
-          <div className="flex flex-col gap-3">
-            <ClayCard className="p-4 sm:p-6 overflow-hidden flex flex-col items-center justify-center bg-white">
-              <div className="w-full aspect-square rounded-2xl overflow-hidden bg-clay-surface flex items-center justify-center shadow-inner relative group">
-                <img
-                  src={imageUrl}
-                  alt={activeTitle}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  onError={(e) => {
-                    e.currentTarget.src = '/demo/enhanced_pottery.jpg'
-                  }}
-                />
-                <div className="absolute top-3 left-3 bg-slate-900/80 backdrop-blur-md text-white text-[11px] font-bold px-3 py-1 rounded-full flex items-center gap-1.5 border border-white/20">
-                  <Sparkle size={14} weight="fill" className="text-amber-400" />
-                  <span>AI Studio Enhanced</span>
-                </div>
-              </div>
+        {/* ── Main layout: image + details ─────────────────────────────── */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-10 items-start mt-4">
 
-              {/* Verified Authentic Badge */}
-              <div className="mt-4 w-full flex items-center justify-between text-xs text-clay-muted border-t border-slate-100 pt-3">
-                <div className="flex items-center gap-1.5 text-emerald-700 font-bold">
-                  <ShieldCheck size={18} weight="fill" />
-                  <span>प्रमाणित हस्तनिर्मित शिल्प</span>
-                </div>
-                <span className="font-mono text-[11px] bg-slate-100 px-2 py-0.5 rounded-md font-semibold text-slate-600">
-                  {product.product_id}
-                </span>
+          {/* Left: Product image */}
+          <div className="clay-card overflow-hidden bg-white shadow-editorial-md">
+            {imageUrl ? (
+              <img
+                src={imageUrl}
+                alt={activeTitle}
+                className="w-full object-cover"
+                style={{ aspectRatio: '4/3', display: 'block' }}
+                onError={(e) => { e.currentTarget.parentElement.style.background = '#F5F5F4' }}
+              />
+            ) : (
+              <div className="w-full bg-stone-surface flex items-center justify-center text-5xl"
+                   style={{ aspectRatio: '4/3' }}>
+                🪔
               </div>
-            </ClayCard>
+            )}
+
+            {/* Authenticity footer */}
+            <div className="px-4 py-3 flex items-center justify-between border-t border-stone-200 bg-stone-50/50">
+              <div className="flex items-center gap-1.5 text-forest text-xs font-medium">
+                <ShieldCheck size={16} weight="fill" />
+                <span>{t('screen.verified_handmade', 'Verified handmade creation')}</span>
+              </div>
+              <span className="font-mono text-[11px] text-ink-faint">
+                {product.product_id || productId}
+              </span>
+            </div>
           </div>
 
-          {/* Right Column: Details, Pricing, Multilingual Tabs */}
+          {/* Right: Product details */}
           <div className="flex flex-col gap-5">
-            <ClayCard className="p-6 sm:p-8 flex flex-col gap-5">
-              {/* Category & Status Badges */}
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <ClayBadge variant="primary">
-                  {product.category?.replace('_', ' ').toUpperCase()}
-                </ClayBadge>
-                <span className="text-xs font-bold px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300">
-                  ● सक्रिय उत्पाद (Live)
+
+            {/* Category + status */}
+            <div className="flex items-center justify-between gap-3">
+              {product.category && (
+                <span className="section-label">
+                  {activeCategoryLabel}
+                </span>
+              )}
+              <span className="clay-badge clay-badge-success flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-forest inline-block" />
+                <span>{t('screen.live_product', 'Available')}</span>
+              </span>
+            </div>
+
+            {/* Title */}
+            <h1 className="text-xl sm:text-2xl font-bold text-ink leading-snug">
+              {activeTitle}
+            </h1>
+
+            {/* Price */}
+            <div className="border-t border-stone-200 pt-4">
+              <p className="section-label mb-1">{t('screen.fair_price', 'Direct Artisan Price')}</p>
+              <p className="price-display text-3xl font-bold text-ink">
+                ₹{product.price?.toLocaleString('en-IN')}
+              </p>
+              <p className="text-xs text-ink-faint mt-1">
+                {t('screen.direct_payment', 'Direct from artisan workshop')} · {t('screen.no_middleman', 'Zero intermediary commission')}
+              </p>
+            </div>
+
+            {/* Artisan Workshop Attribution */}
+            <div className="p-3 rounded-lg bg-stone-50 border border-stone-200 flex items-center justify-between text-xs">
+              <div>
+                <span className="text-[10px] text-ink-faint block uppercase font-medium">
+                  {t('artisan_workshop', 'Workshop')}
+                </span>
+                <span className="font-semibold text-ink">
+                  {product.artisan_name || 'Rameshwar Prajapati'}
+                </span>
+                <span className="text-ink-muted block text-[11px]">
+                  {product.location || 'India'}
                 </span>
               </div>
 
-              {/* Title & Language Switcher */}
+              <Link
+                to={`/passport/${artisanId}`}
+                className="text-xs text-amber-900 font-medium hover:underline flex items-center gap-1 shrink-0"
+              >
+                <span>{t('screen.artisan_passport', 'View Passport')}</span>
+                <span>→</span>
+              </Link>
+            </div>
+
+            {/* Description / story */}
+            {activeDesc && (
               <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <button
-                    type="button"
-                    onClick={() => setSelectedLang('hi')}
-                    className={`text-xs font-bold px-2.5 py-1 rounded-lg transition-all ${
-                      selectedLang === 'hi'
-                        ? 'bg-clay-primary text-white shadow-sm'
-                        : 'bg-clay-surface text-clay-indigo hover:bg-clay-deep'
-                    }`}
-                  >
-                    हिंदी (Hindi)
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setSelectedLang('en')}
-                    className={`text-xs font-bold px-2.5 py-1 rounded-lg transition-all ${
-                      selectedLang === 'en'
-                        ? 'bg-clay-primary text-white shadow-sm'
-                        : 'bg-clay-surface text-clay-indigo hover:bg-clay-deep'
-                    }`}
-                  >
-                    English
-                  </button>
-                </div>
-
-                <h1 className="text-2xl sm:text-3xl font-black text-clay-indigo font-heading leading-tight">
-                  {activeTitle}
-                </h1>
-              </div>
-
-              {/* Transparent Fair Price Box */}
-              <div className="p-4 rounded-2xl bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200/80 flex items-baseline justify-between shadow-sm">
-                <div>
-                  <span className="text-xs font-black uppercase text-amber-800 tracking-wider block">
-                    उचित शिल्प मूल्य (Fair Artisan Price)
-                  </span>
-                  <span className="text-3xl sm:text-4xl font-black text-clay-primary font-heading">
-                    ₹{product.price?.toLocaleString('en-IN')}
-                  </span>
-                </div>
-                <div className="text-right">
-                  <span className="text-[11px] font-bold text-slate-500 block">100% कारीगर को सीधा भुगतान</span>
-                  <span className="text-[11px] font-bold text-emerald-700">शून्य बिचौलिया कमीशन</span>
-                </div>
-              </div>
-
-              {/* Cultural Heritage Story & Description */}
-              <div className="flex flex-col gap-2">
-                <h3 className="text-xs font-black uppercase tracking-wider text-clay-muted">
-                  उत्पाद की कहानी व विवरण (Story & Heritage)
-                </h3>
-                <p className="text-sm text-clay-text leading-relaxed font-sans whitespace-pre-line bg-clay-surface/50 p-4 rounded-2xl border border-white/60">
+                <p className="section-label mb-1.5">{t('screen.story_heritage', 'Artisan Story & Craftsmanship')}</p>
+                <p className="text-xs sm:text-sm text-ink-soft leading-relaxed" style={{ lineHeight: '1.75' }}>
                   {activeDesc}
                 </p>
               </div>
+            )}
 
-              {/* Craft Specifications */}
-              <div className="grid grid-cols-2 gap-3 text-xs">
-                {listing.craft_tradition && (
-                  <div className="p-3 rounded-xl bg-clay-surface border border-white/60">
-                    <span className="text-clay-muted font-bold block">शिल्प परंपरा (Tradition):</span>
-                    <span className="text-clay-indigo font-extrabold">{listing.craft_tradition}</span>
+            {/* Craft specs */}
+            {(activeTech || activeMat || listing.craft_tradition || listing.material_detected || product.material) && (
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                {(activeTech || listing.craft_tradition || product.technique) && (
+                  <div className="clay-card-inset p-2.5 rounded bg-stone-50 border border-stone-200">
+                    <p className="section-label mb-0.5">{t('screen.craft_tradition', 'Craft Tradition')}</p>
+                    <p className="font-medium text-ink truncate">{activeTech || listing.craft_tradition || product.technique}</p>
                   </div>
                 )}
-                {listing.material_detected && (
-                  <div className="p-3 rounded-xl bg-clay-surface border border-white/60">
-                    <span className="text-clay-muted font-bold block">प्राकृतिक सामग्री (Material):</span>
-                    <span className="text-clay-indigo font-extrabold">{listing.material_detected}</span>
+                {(activeMat || listing.material_detected || product.material) && (
+                  <div className="clay-card-inset p-2.5 rounded bg-stone-50 border border-stone-200">
+                    <p className="section-label mb-0.5">{t('screen.material', 'Material')}</p>
+                    <p className="font-medium text-ink truncate">{activeMat || listing.material_detected || product.material}</p>
                   </div>
                 )}
               </div>
+            )}
 
-              {/* SEO Tags */}
-              {product.tags && product.tags.length > 0 && (
-                <div className="flex flex-wrap items-center gap-1.5 pt-2">
-                  <Tag size={16} className="text-clay-muted shrink-0" />
-                  {product.tags.map((tag, i) => (
-                    <span key={i} className="text-[11px] font-bold px-2.5 py-0.5 rounded-md bg-slate-100 text-slate-600 border border-slate-200">
-                      #{tag}
-                    </span>
-                  ))}
+            {/* Tags */}
+            {product.tags && product.tags.length > 0 && (
+              <div className="flex flex-wrap items-center gap-1.5">
+                <Tag size={13} className="text-ink-faint shrink-0" />
+                {product.tags.map((tag, i) => (
+                  <span key={i} className="clay-badge clay-badge-muted text-[11px]">
+                    #{tag}
+                  </span>
+                ))}
+              </div>
+            )}
+
+            {/* CTAs: Role-aware */}
+            {role === 'artisan' ? (
+              <div className="flex flex-col gap-2.5 pt-3 border-t border-stone-200">
+                <div className="p-3 rounded-lg bg-stone-50 border border-stone-200/90 text-xs text-ink-muted flex items-center justify-between">
+                  <span className="font-medium">{t('artisan.public_view_notice', 'Viewing published catalog listing (Artisan Studio mode)')}</span>
                 </div>
-              )}
 
-              {/* Direct WhatsApp Purchase Action */}
-              <div className="pt-2 flex flex-col gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  <button
+                    type="button"
+                    onClick={() => navigate(`/listing/${product.product_id || productId}/wholesale`)}
+                    className="clay-btn clay-btn-primary w-full flex items-center justify-center gap-2 text-xs cursor-pointer"
+                    style={{ minHeight: '42px' }}
+                  >
+                    <span>📄 {t('wholesale.b2b_inquiry_btn', 'B2B Spec Sheet')}</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleShare}
+                    className="clay-btn clay-btn-ghost w-full flex items-center justify-center gap-2 text-ink text-xs border border-stone-300 bg-white hover:bg-stone-50 cursor-pointer"
+                    style={{ minHeight: '42px' }}
+                  >
+                    <ShareNetwork size={16} />
+                    <span>{t('screen.share', 'Share Product Link')}</span>
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-2.5 pt-3 border-t border-stone-200">
+                {/* Primary CTA: Request Proposal */}
                 <button
                   type="button"
-                  onClick={() => setMarketModalOpen(true)}
-                  className="w-full py-3.5 px-6 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-heading font-black text-sm sm:text-base flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/25 transition-all active:scale-98 cursor-pointer"
+                  onClick={() => setProposalModalOpen(true)}
+                  className="clay-btn clay-btn-primary w-full flex items-center justify-center gap-2 text-sm cursor-pointer"
+                  style={{ minHeight: '46px' }}
                 >
-                  <Buildings size={22} weight="duotone" />
-                  <span>संबंधित खरीदार व बाज़ार अवसर देखें (Market Matches)</span>
+                  <PaperPlaneTilt size={17} weight="bold" />
+                  <span>{t('buyer.request_proposal_cta', 'Request Commercial Proposal')}</span>
                 </button>
 
-                <a
-                  href={whatsappUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-full py-3.5 px-6 rounded-2xl bg-[#25D366] hover:bg-[#20bd5a] text-white font-heading font-black text-sm sm:text-base flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/30 transition-all active:scale-98"
-                >
-                  <WhatsappLogo size={24} weight="fill" />
-                  <span>कारीगर से व्हाट्सएप पर संपर्क करें (Buy on WhatsApp)</span>
-                </a>
+                {/* Secondary CTAs: WhatsApp & SMS */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {whatsappUrl ? (
+                    <a
+                      href={whatsappUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="clay-btn w-full flex items-center justify-center gap-2 text-white text-xs"
+                      style={{
+                        background: '#25D366',
+                        borderColor: '#25D366',
+                        borderRadius: '6px',
+                        minHeight: '40px',
+                        fontWeight: 500,
+                        textDecoration: 'none',
+                      }}
+                    >
+                      <WhatsappLogo size={18} weight="fill" />
+                      <span>{t('screen.buy_whatsapp', 'Contact on WhatsApp')}</span>
+                    </a>
+                  ) : (
+                    <button
+                      type="button"
+                      disabled
+                      className="clay-btn clay-btn-ghost w-full flex items-center justify-center gap-2 text-stone-400 text-xs border border-stone-200 opacity-60 cursor-not-allowed"
+                      style={{
+                        borderRadius: '6px',
+                        minHeight: '40px',
+                        fontWeight: 500,
+                      }}
+                      title={t('buyer.whatsapp_unavailable', 'WhatsApp unavailable for this artisan')}
+                    >
+                      <WhatsappLogo size={18} weight="fill" className="text-stone-400" />
+                      <span>{t('buyer.whatsapp_unavailable', 'WhatsApp Unavailable')}</span>
+                    </button>
+                  )}
 
-                <div className="flex items-center justify-center gap-2 text-center text-xs text-clay-muted pt-1">
-                  <Sparkle size={14} className="text-amber-500" />
-                  <span>कारीगर AI द्वारा सत्यापित डिजिटल कैटलॉग</span>
+                  {smsUrl ? (
+                    <a
+                      href={smsUrl}
+                      className="clay-btn clay-btn-ghost w-full flex items-center justify-center gap-2 text-stone-800 text-xs bg-stone-100 hover:bg-stone-200 border border-stone-300"
+                      style={{
+                        borderRadius: '6px',
+                        minHeight: '40px',
+                        fontWeight: 500,
+                        textDecoration: 'none',
+                      }}
+                    >
+                      <ChatText size={18} weight="bold" className="text-stone-700" />
+                      <span>{t('buyer.send_sms', 'Send SMS')}</span>
+                    </a>
+                  ) : (
+                    <button
+                      type="button"
+                      disabled
+                      className="clay-btn clay-btn-ghost w-full flex items-center justify-center gap-2 text-stone-400 text-xs border border-stone-200 opacity-60 cursor-not-allowed"
+                      style={{
+                        borderRadius: '6px',
+                        minHeight: '40px',
+                        fontWeight: 500,
+                      }}
+                    >
+                      <ChatText size={18} weight="bold" className="text-stone-400" />
+                      <span>{t('buyer.send_sms', 'Send SMS')}</span>
+                    </button>
+                  )}
                 </div>
               </div>
-            </ClayCard>
+            )}
           </div>
         </div>
       </main>
 
-      <MarketOpportunitiesModal
-        isOpen={marketModalOpen}
-        onClose={() => setMarketModalOpen(false)}
-        productId={product.product_id}
-        productTitle={activeTitle}
-        productCategory={product.category}
-        productPrice={product.price}
-      />
+      {/* Buyer Proposal Modal */}
+      {proposalModalOpen && (
+        <BuyerProposalModal
+          isOpen={proposalModalOpen}
+          onClose={() => setProposalModalOpen(false)}
+          product={{
+            ...product,
+            product_id: product.product_id || productId,
+            title: activeTitle,
+          }}
+          onSuccess={() => {
+            showToast(t('buyer.request_sent_success', 'Proposal request sent!'))
+          }}
+        />
+      )}
+
+      {/* Toast */}
+      <AnimatePresence>
+        {toastMessage && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 10 }}
+            className="toast"
+          >
+            <Check size={14} weight="bold" className="text-forest shrink-0" />
+            <span>{toastMessage}</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }

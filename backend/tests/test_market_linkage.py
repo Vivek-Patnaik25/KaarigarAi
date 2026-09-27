@@ -42,7 +42,7 @@ async def run_market_linkage_tests():
     # Test 3: Deterministic re-seeding verification
     count_again = await seed_buyer_requirements(db, overwrite=False)
     assert count_again == count, "Seed should be deterministic and idempotent"
-    sample_b = await db[BUYER_REQUIREMENTS_COLLECTION].find_one({"buyer_id": "DEMO-BUYER-001"})
+    sample_b = await db[BUYER_REQUIREMENTS_COLLECTION].find_one({"buyer_id": DEMO_BUYER_REQUIREMENTS[0]["buyer_id"]})
     assert sample_b is not None and sample_b.get("demo_data") is True, "Buyer record missing demo_data=True"
     print("✓ Test 3 Passed: Deterministic seed behavior verified.")
 
@@ -218,7 +218,7 @@ async def run_market_linkage_tests():
         gi_signal=False,
         semantic_text="Handcrafted Terracotta Pot",
     )
-    buyer_001 = await db[BUYER_REQUIREMENTS_COLLECTION].find_one({"buyer_id": "DEMO-BUYER-001"})
+    buyer_001 = await db[BUYER_REQUIREMENTS_COLLECTION].find_one({"buyer_id": DEMO_BUYER_REQUIREMENTS[0]["buyer_id"]})
     match_res = buyer_matching_service.match_product_against_buyer(sample_prod, buyer_001)
     assert match_res.match_score >= 0.75
     assert match_res.match_level == "high"

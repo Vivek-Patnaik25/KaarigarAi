@@ -9,6 +9,7 @@ from app.core.config import settings
 from app.db.mongodb import get_database
 from app.db.collections import PRODUCTS_COLLECTION
 from app.models.schemas import ProductDocument, ProductListingPublishRequest
+from app.core.language import normalize_language
 from app.services.image_storage_service import image_storage_service, extract_gridfs_file_id
 
 logger = logging.getLogger("ProductService")
@@ -49,10 +50,10 @@ class ProductService:
         raw_ai = payload.ai_metadata or {}
         raw_source = payload.source or {}
 
-        # Resolve primary title
-        title = payload.title or raw_listing.get("title_hi") or raw_listing.get("title_en") or "हस्तनिर्मित उत्पाद"
-        # Resolve primary description
-        description = payload.description or raw_listing.get("description_hi") or raw_listing.get("description_en") or ""
+        language = normalize_language(payload.language)
+        # English is the single safe fallback; never silently substitute Hindi.
+        title = payload.title or raw_listing.get(f"title_{language}") or raw_listing.get("title_en") or "Handcrafted product"
+        description = payload.description or raw_listing.get(f"description_{language}") or raw_listing.get("description_en") or ""
         # Resolve category
         category = payload.category or raw_ai.get("category") or "pottery_terracotta"
         # Resolve price
@@ -64,8 +65,16 @@ class ProductService:
         listing_obj = {
             "title_en": raw_listing.get("title_en") or title,
             "title_hi": raw_listing.get("title_hi") or title,
+            "title_ta": raw_listing.get("title_ta") or "",
+            "title_mr": raw_listing.get("title_mr") or "",
+            "title_or": raw_listing.get("title_or") or "",
+            "title_bn": raw_listing.get("title_bn") or "",
             "description_en": raw_listing.get("description_en") or description,
             "description_hi": raw_listing.get("description_hi") or description,
+            "description_ta": raw_listing.get("description_ta") or "",
+            "description_mr": raw_listing.get("description_mr") or "",
+            "description_or": raw_listing.get("description_or") or "",
+            "description_bn": raw_listing.get("description_bn") or "",
             "description_regional": raw_listing.get("description_regional") or "",
             "seo_tags": tags,
             "craft_tradition": raw_listing.get("craft_tradition"),
@@ -76,7 +85,7 @@ class ProductService:
         ai_metadata_obj = {
             "category": category,
             "category_confidence": float(raw_ai.get("category_confidence", 0.90)),
-            "detected_language": payload.language or raw_ai.get("detected_language", "hi"),
+            "detected_language": language,
             "language_confidence": float(raw_ai.get("language_confidence", 1.0)),
             "image_quality_score": float(raw_ai.get("image_quality_score", 0.85)),
             "price_min": int(raw_ai.get("price_min", round((raw_ai.get("price_suggested") or price) * 0.80))),
@@ -89,7 +98,7 @@ class ProductService:
         source_obj = {
             "transcript": raw_source.get("transcript", ""),
             "original_filename": raw_source.get("original_filename"),
-            "detected_language": payload.language or raw_source.get("detected_language", "hi"),
+            "detected_language": raw_source.get("detected_language", language),
         }
 
         # Construct public URL based on FRONTEND_PUBLIC_URL configuration

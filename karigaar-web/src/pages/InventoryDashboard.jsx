@@ -1,323 +1,400 @@
 import React, { useState, useEffect } from 'react'
-import { useNavigate, useLocation } from 'react-router-dom'
+import { useNavigate, useLocation, Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { motion, AnimatePresence } from 'framer-motion'
-import { 
-  Plus, 
-  Storefront, 
-  Coins, 
-  Package, 
-  CheckCircle, 
-  IdentificationBadge, 
-  House, 
-  Sparkle,
-  ShareNetwork,
+import {
+  Plus,
+  Storefront,
+  IdentificationBadge,
   Check,
-  Tag
+  Warning,
+  ArrowRight,
+  Buildings,
+  MapPin,
+  Sparkle,
+  PaperPlaneTilt,
+  ShieldCheck,
+  QrCode,
+  ShareNetwork,
+  Tag,
+  Gear
 } from '@phosphor-icons/react'
 import Navbar from '../components/Navbar'
-import StatCard from '../components/StatCard'
 import ListingMiniCard from '../components/ListingMiniCard'
 import ClayButton from '../components/ClayButton'
-import ClayCard from '../components/ClayCard'
+import ProposalModal from '../components/ProposalModal'
 
-import { fetchMyListings, updateProductStatus, deleteProduct } from '../config/api'
+import { fetchMyListings, fetchBuyerRequirements, updateProductStatus, deleteProduct } from '../config/api'
+import { localizedField } from '../config/language'
+import { useLanguageStore } from '../store/languageStore'
+import { useUserStore } from '../store/userStore'
+import { useCatalogStore } from '../store/catalogStore'
+import { DEMO_ARTISAN, getSentProposals } from '../config/auth'
+import { getLocalizedBuyerOpportunity } from '../config/buyerOpportunitiesLocalized'
 
 const STORAGE_KEY = 'karigaar_listings'
+const ARTISAN_ID = 'KG-2024-8921'
 
-// Optional initial mock seed if user has never used the app before
-export const SEED_LISTINGS = [
-  {
-    id: 'lst-101',
-    product_id: 'lst-101',
-    title: 'हस्तनिर्मित राजस्थानी मिट्टी का घड़ा (Terracotta Heritage Pot)',
-    category: 'pottery_terracotta',
-    price: 1939,
-    status: 'active',
-    image: 'https://images.unsplash.com/photo-1578749556568-bc2c40e68b61?auto=format&fit=crop&w=600&q=80',
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: 'lst-102',
-    product_id: 'lst-102',
-    title: 'बनारसी ज़री हैंडलूम रेशमी दुपट्टा (Zari Silk Dupatta)',
-    category: 'textile_handloom',
-    price: 2850,
-    status: 'sold',
-    image: 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=600&q=80',
-    createdAt: new Date(Date.now() - 3 * 86400000).toISOString(),
-  },
-  {
-    id: 'lst-103',
-    product_id: 'lst-103',
-    title: 'पीतल की नक्काशीदार धूपदानी (Carved Brass Burner)',
-    category: 'metalcraft',
-    price: 1350,
-    status: 'active',
-    image: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=600&q=80',
-    createdAt: new Date(Date.now() - 6 * 86400000).toISOString(),
-  },
+const LOCAL_PLACEHOLDER_IMAGES = [
+  '/images/IMG_20260715_162127_448x448.webp',
+  '/images/WhatsAppImage2025-10-04at5.07.21PM_28.webp',
+  '/images/gcescodr0030s-_282_29.webp',
 ]
+
+function getPlaceholderImage(index) {
+  return LOCAL_PLACEHOLDER_IMAGES[index % LOCAL_PLACEHOLDER_IMAGES.length]
+}
 
 export default function InventoryDashboard() {
   const { t } = useTranslation()
+  const { language } = useLanguageStore()
   const navigate = useNavigate()
   const location = useLocation()
+
   const [listings, setListings] = useState([])
   const [loading, setLoading] = useState(true)
+  const [opportunities, setOpportunities] = useState([])
+  const [dataSource, setDataSource] = useState('loading')
   const [toastMessage, setToastMessage] = useState('')
+  const [activeOpportunity, setActiveOpportunity] = useState(null)
+  const [selectedProductForProposal, setSelectedProductForProposal] = useState(null)
 
-  // Smooth scroll to hash anchor if present (e.g. #listings or #earnings)
   useEffect(() => {
     if (location.hash) {
       const target = document.querySelector(location.hash)
-      if (target) {
-        setTimeout(() => {
-          target.scrollIntoView({ behavior: 'smooth' })
-        }, 100)
-      }
+      if (target) setTimeout(() => target.scrollIntoView({ behavior: 'smooth' }), 100)
     }
   }, [location.hash])
 
-  // Load from MongoDB backend on mount with fallback
-  const loadData = async () => {
+  const loadListings = async () => {
     setLoading(true)
     try {
-      const data = await fetchMyListings('KG-2024-8921')
+      const data = await fetchMyListings(ARTISAN_ID)
       const items = Array.isArray(data) ? data : (data?.listings || [])
+
       if (Array.isArray(items) && items.length > 0) {
-        // Map backend schema to unified listing structure for cards
-        const mapped = items.map((item) => ({
+        const mapped = items.map((item, idx) => ({
           id: item.product_id,
           product_id: item.product_id,
-          title: item.title_hi || item.title_en || item.title || 'Handcrafted Artisan Item',
-          title_en: item.title_en,
-          title_hi: item.title_hi,
+          listing: item.listing || null,
+          title: item.listing?.title_en || item.title || 'Handcrafted Artisan Item',
+          title_en: item.listing?.title_en || item.title,
+          title_hi: item.listing?.title_hi || item.title,
+          title_ta: item.listing?.title_ta || '',
+          title_mr: item.listing?.title_mr || '',
+          title_or: item.listing?.title_or || '',
+          title_bn: item.listing?.title_bn || '',
           category: item.category,
           price: item.price,
-          status: item.status || 'published',
-          image: item.image_url || (item.image_gridfs_id ? `/v1/media/${item.image_gridfs_id}` : null),
+          status: normalizeStatus(item.status),
+          image: item.image_url || getPlaceholderImage(idx),
+          image_url: item.image_url || null,
           createdAt: item.published_at || item.created_at || new Date().toISOString(),
           public_url: item.public_url || `/p/${item.product_id}`,
+          _isRealData: true,
         }))
         setListings(mapped)
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(mapped))
+        setDataSource('backend')
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(mapped)) } catch (_) {}
         setLoading(false)
         return
       }
-    } catch (err) {
-      console.warn('Backend listings fetch failed, checking local cache:', err)
-    }
 
-    // Fallback to local storage or seed
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY)
-      if (stored) {
-        const parsed = JSON.parse(stored)
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          setListings(parsed)
-          setLoading(false)
-          return
+      setListings([])
+      setDataSource('empty')
+    } catch (err) {
+      console.warn('Backend listings fetch failed:', err)
+      try {
+        const stored = localStorage.getItem(STORAGE_KEY)
+        if (stored) {
+          const parsed = JSON.parse(stored)
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setListings(parsed)
+            setDataSource('cache')
+            setLoading(false)
+            return
+          }
         }
-      }
-      setListings(SEED_LISTINGS)
-    } catch (e) {
-      console.error('Failed to load listings:', e)
-      setListings(SEED_LISTINGS)
+      } catch (_) {}
+      setListings([])
+      setDataSource('empty')
     }
     setLoading(false)
   }
 
-  useEffect(() => {
-    loadData()
-  }, [])
-
-  // Handle status toggle (active <-> sold)
-  const handleStatusChange = async (id, newStatus) => {
-    // Optimistic UI update
-    const updated = listings.map((item) =>
-      (item.id === id || item.product_id === id) ? { ...item, status: newStatus } : item
-    )
-    setListings(updated)
+  const loadBuyerOpportunities = async () => {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(updated))
-    } catch (e) {}
-
-    // Call backend API
-    try {
-      await updateProductStatus(id, newStatus)
-    } catch (e) {
-      console.warn('Backend status update failed:', e)
+      const data = await fetchBuyerRequirements()
+      const buyers = Array.isArray(data) ? data : (data?.buyers || data?.data || [])
+      setOpportunities(Array.isArray(buyers) ? buyers : [])
+    } catch (_) {
+      setOpportunities([])
     }
-
-    setToastMessage(
-      newStatus === 'sold'
-        ? t('dashboard.marked_sold', 'Listing marked as Sold! 🎉')
-        : t('dashboard.marked_active', 'Listing reactivated!')
-    )
-    setTimeout(() => setToastMessage(''), 3000)
   }
 
-  // Handle delete
+  useEffect(() => {
+    loadListings()
+    loadBuyerOpportunities()
+  }, [language])
+
+  function normalizeStatus(s) {
+    const v = (s || '').toLowerCase().trim()
+    if (v === 'active' || v === 'published') return 'active'
+    if (v === 'sold') return 'sold'
+    if (v === 'archived') return 'archived'
+    return 'draft'
+  }
+
+  const handleStatusChange = async (id, newStatus) => {
+    const updated = listings.map((item) =>
+      (item.id === id || item.product_id === id) ? { ...item, status: normalizeStatus(newStatus) } : item
+    )
+    setListings(updated)
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(updated)) } catch (_) {}
+    try { await updateProductStatus(id, newStatus) } catch (e) { console.warn('Status update failed:', e) }
+    showToast(newStatus === 'sold' ? t('dashboard.marked_sold', 'Marked as Sold') : t('dashboard.marked_active', 'Marked as Active'))
+  }
+
   const handleDelete = async (id) => {
-    // Optimistic UI update
     const updated = listings.filter((item) => item.id !== id && item.product_id !== id)
     setListings(updated)
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(updated))
-    } catch (e) {}
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(updated)) } catch (_) {}
+    try { await deleteProduct(id) } catch (e) { console.warn('Delete failed:', e) }
+    showToast(t('delete_listing', 'Product removed'))
+  }
 
-    // Call backend API
+  const handleShare = async (listing) => {
+    const id = listing.product_id || listing.id
+    const shareUrl = `${window.location.origin}/p/${id}`
     try {
-      await deleteProduct(id)
-    } catch (e) {
-      console.warn('Backend delete failed:', e)
+      await navigator.clipboard.writeText(shareUrl)
+      showToast(t('share_success', 'Public link copied!'))
+    } catch (_) {}
+  }
+
+  const handleOpenProposal = (opp) => {
+    setActiveOpportunity(opp)
+    if (listings.length > 0) {
+      setSelectedProductForProposal(listings[0])
     }
+  }
 
-    setToastMessage(t('dashboard.deleted', 'Listing removed from inventory'))
+  const showToast = (msg) => {
+    setToastMessage(msg)
     setTimeout(() => setToastMessage(''), 3000)
   }
 
-  // Handle share
-  const handleShare = async (listing) => {
-    const id = listing.product_id || listing.id
-    const shareUrl = id.startsWith('KRG-') || id.startsWith('lst-')
-      ? `${window.location.origin}/p/${id}`
-      : `${window.location.origin}/passport/KG-2024-8921`
-    try {
-      await navigator.clipboard.writeText(shareUrl)
-      setToastMessage(t('passport.linkCopied', 'Public product link copied to clipboard!'))
-      setTimeout(() => setToastMessage(''), 3000)
-    } catch (err) {
-      console.error('Clipboard copy error:', err)
+  // Derived state
+  const activeListings = listings.filter(l => l.status === 'active')
+  const draftListings  = listings.filter(l => l.status === 'draft' || l.status === 'archived')
+  const totalCount     = listings.length
+
+  // "What should I do next?" — One meaningful recommended action based on actual state
+  const nextAction = (() => {
+    if (loading) return null
+    if (totalCount === 0) {
+      return {
+        label: t('dashboard.action_add_first', 'Add your first product'),
+        description: t('dashboard.action_add_first_desc', 'Photograph and generate a multilingual catalogue listing in 60 seconds.'),
+        to: '/catalog',
+        cta: t('add_new_product', 'Add Product')
+      }
     }
-  }
+    if (draftListings.length > 0) {
+      return {
+        label: t('dashboard.continue_draft', 'Finish and publish your draft product'),
+        description: t('dashboard.continue_draft_desc', `You have ${draftListings.length} draft product awaiting final review.`),
+        to: '/catalog',
+        cta: t('continue', 'Continue Draft')
+      }
+    }
+    if (opportunities.length > 0) {
+      return {
+        label: t('dashboard.action_review_buyers', 'Review matching buyer requirements'),
+        description: t('dashboard.action_review_buyers_desc', `${opportunities.length} verified retail and hospitality buyers are looking for handcrafted goods.`),
+        to: '/artisan/opportunities',
+        cta: t('view_opportunities', 'View Opportunities')
+      }
+    }
+    return null
+  })()
 
-  // Calculate stats
-  const activeCount = listings.filter((l) => ['active', 'published'].includes((l.status || 'published').toLowerCase())).length
-  const totalCount = listings.length
+  const { user } = useUserStore()
+  const artisanProfile = (user && user.role === 'artisan') ? user : DEMO_ARTISAN
 
-  // Calculate earnings for sold items in current month
-  const currentMonth = new Date().getMonth()
-  const currentYear = new Date().getFullYear()
-  const monthlyEarnings = listings
-    .filter((l) => {
-      if ((l.status || '').toLowerCase() !== 'sold') return false
-      if (!l.createdAt) return true
-      const d = new Date(l.createdAt)
-      return d.getMonth() === currentMonth && d.getFullYear() === currentYear
-    })
-    .reduce((sum, l) => sum + (Number(l.price) || 0), 0)
+  // Top 3 relevant opportunities for dashboard preview, fully localized
+  const previewOpportunities = opportunities.slice(0, 3).map(opp => getLocalizedBuyerOpportunity(opp, language))
 
   return (
-    <div className="min-h-screen bg-clay-bg flex flex-col relative pb-24">
-      {/* Top Navigation */}
+    <div className="min-h-screen bg-stone-bg flex flex-col pb-24">
       <Navbar />
 
-      <main className="max-w-6xl mx-auto w-full px-4 sm:px-6 py-6 sm:py-8 flex-1 flex flex-col gap-8">
-        {/* Header Title with Passport & Quick Access */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <span className="text-xs font-black uppercase tracking-wider text-clay-primary bg-clay-primary-soft/40 px-2.5 py-0.5 rounded-full border border-clay-primary/30">
-                {t('dashboard.business_glance', 'Business at a Glance')}
-              </span>
+      <main className="max-w-5xl mx-auto w-full px-4 sm:px-6 py-8 flex-1 flex flex-col gap-10">
+
+        {/* ── 1. Top Workshop & Artisan Context ──────────────────────────── */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-stone-200/80 pb-6">
+          <div className="flex items-start gap-3.5">
+            <div className="w-12 h-12 rounded-lg overflow-hidden shrink-0 shadow-2xs border border-stone-200 bg-stone-100">
+              <img
+                src={artisanProfile.avatarUrl || DEMO_ARTISAN.avatarUrl || '/artisan_avatar.png'}
+                alt={artisanProfile.name || DEMO_ARTISAN.name}
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  e.currentTarget.onerror = null
+                  e.currentTarget.src = '/artisan_avatar.png'
+                }}
+              />
             </div>
-            <h1 className="text-2xl sm:text-3xl font-black text-clay-indigo font-heading">
-              {t('dashboard.inventory_title', 'Artisan Store & Inventory')}
-            </h1>
+            <div>
+              <div className="flex items-center gap-2 mb-0.5">
+                <span className="text-xs font-semibold text-ink">
+                  {artisanProfile.name || DEMO_ARTISAN.name}
+                </span>
+                <span className="clay-badge clay-badge-success text-[10px] py-0">
+                  {t('verified_workshop', 'Verified Workshop')}
+                </span>
+              </div>
+              <p className="text-xs text-ink-muted flex items-center gap-1.5">
+                <MapPin size={13} className="text-amber-acc" />
+                <span>{artisanProfile.location || DEMO_ARTISAN.location} · {t('category.pottery', artisanProfile.craftTitle || DEMO_ARTISAN.craftTitle)}</span>
+              </p>
+            </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 self-start sm:self-center">
             <button
               type="button"
-              onClick={() => navigate('/passport/KG-2024-8921')}
-              className="px-4 py-2.5 rounded-2xl bg-clay-surface hover:bg-clay-deep text-clay-indigo font-heading font-bold text-xs sm:text-sm flex items-center gap-2 shadow-sm border border-white/60 transition-all active:scale-95"
+              onClick={() => navigate('/settings?tab=artisan')}
+              className="flex items-center gap-1.5 px-3 py-2 rounded border border-stone-300 bg-white hover:bg-stone-50 text-ink text-xs font-medium transition-colors shadow-2xs cursor-pointer"
+              title={t('settings.title', 'Edit Profile')}
             >
-              <IdentificationBadge size={20} weight="fill" className="text-amber-600" />
-              <span>{t('passport.title', 'My Passport')}</span>
+              <Gear size={15} className="text-stone-600" />
+              <span>{t('settings.edit_profile', 'Edit Profile')}</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => navigate(`/passport/${artisanProfile.artisanId || 'KG-2024-8921'}`)}
+              className="flex items-center gap-1.5 px-3 py-2 rounded border border-stone-300 bg-white hover:bg-stone-50 text-ink text-xs font-medium transition-colors shadow-2xs cursor-pointer"
+            >
+              <IdentificationBadge size={16} weight="fill" className="text-amber-acc" />
+              <span>{t('passport.title', 'Digital Passport')}</span>
             </button>
 
             <ClayButton
               variant="primary"
-              size="md"
-              onClick={() => navigate('/catalog')}
-              icon={<Plus size={18} weight="bold" />}
-              className="shadow-md hidden sm:inline-flex"
+              size="sm"
+              onClick={() => {
+                useCatalogStore.getState().reset()
+                navigate('/catalog?new=true')
+              }}
+              icon={<Plus size={15} weight="bold" />}
             >
               {t('add_new_product', 'Add Product')}
             </ClayButton>
           </div>
         </div>
 
-        {/* TOP ROW: 3 StatCards (stacked on mobile, 3 columns on desktop) */}
-        <div id="earnings" className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 scroll-mt-24">
-          <StatCard
-            label={t('dashboard.active_listings', 'Active Listings')}
-            value={activeCount}
-            variant="primary"
-            icon={<Package size={22} weight="fill" />}
-            subtext={`${activeCount} available in catalog`}
-          />
+        {/* ── 2. What should I do next? (Next Action) ────────────────────── */}
+        {nextAction && (
+          <motion.div
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="clay-card p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-l-4 border-l-amber-acc bg-white"
+          >
+            <div>
+              <div className="flex items-center gap-1.5 mb-1">
+                <Sparkle size={15} weight="fill" className="text-amber-acc" />
+                <span className="section-label text-amber-900 font-semibold">{t('dashboard.next_action', 'Recommended Next Action')}</span>
+              </div>
+              <p className="text-sm font-semibold text-ink">{nextAction.label}</p>
+              <p className="text-xs text-ink-muted mt-0.5">{nextAction.description}</p>
+            </div>
 
-          <StatCard
-            label={t('dashboard.monthly_earnings', "This Month's Earnings")}
-            value={`₹${monthlyEarnings.toLocaleString('en-IN')}`}
-            variant="success"
-            icon={<Coins size={22} weight="fill" />}
-            subtext="From verified sales"
-          />
+            <button
+              type="button"
+              onClick={() => navigate(nextAction.to)}
+              className="clay-btn clay-btn-primary flex items-center gap-1.5 shrink-0 self-start sm:self-auto text-xs"
+              style={{ minHeight: '38px', padding: '7px 16px' }}
+            >
+              <span>{nextAction.cta}</span>
+              <ArrowRight size={14} weight="bold" />
+            </button>
+          </motion.div>
+        )}
 
-          <StatCard
-            label={t('dashboard.total_products', 'Total Products')}
-            value={totalCount}
-            variant="indigo"
-            icon={<Storefront size={22} weight="fill" />}
-            subtext={`${totalCount - activeCount} archived / sold`}
-          />
-        </div>
+        {/* ── 3. My Products Section (Photo-first) ────────────────────────── */}
+        <section id="listings" className="scroll-mt-24">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="text-base font-semibold text-ink">
+                {t('recent_listings', 'My Products')}
+              </h2>
+              <p className="text-xs text-ink-muted">
+                {activeListings.length} {t('status_live', 'live')}, {draftListings.length} {t('status_draft', 'drafts')}
+              </p>
+            </div>
 
-        {/* LISTINGS SECTION */}
-        <section id="listings" className="flex flex-col gap-4 scroll-mt-24">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg sm:text-xl font-black text-clay-indigo font-heading">
-              {t('recent_listings', 'My Product Listings')}
-            </h2>
-            <span className="text-xs font-bold text-clay-muted">
-              {listings.length} items total
-            </span>
+            {totalCount > 0 && (
+              <Link
+                to="/artisan/products"
+                className="text-xs text-amber-acc hover:text-amber-900 font-medium flex items-center gap-1 hover:underline"
+              >
+                <span>{t('view_all_products', 'View all products')}</span>
+                <ArrowRight size={13} />
+              </Link>
+            )}
           </div>
 
-          {listings.length === 0 ? (
-            /* Empty State */
-            <ClayCard className="p-10 text-center flex flex-col items-center justify-center gap-4 my-6">
-              <div className="w-20 h-20 rounded-full bg-clay-primary-soft/40 flex items-center justify-center text-clay-primary shadow-inner">
-                <Storefront size={40} weight="fill" />
-              </div>
+          {/* Loading skeleton */}
+          {loading && (
+            <div className="flex flex-col gap-3">
+              {[1, 2, 3].map(i => (
+                <div key={i} className="clay-card h-24 skeleton" />
+              ))}
+            </div>
+          )}
 
-              <div className="max-w-md">
-                <h3 className="text-lg font-bold text-clay-indigo font-heading mb-1">
-                  {t('dashboard.empty_title', "You haven't listed anything yet")}
+          {/* Empty state */}
+          {!loading && listings.length === 0 && (
+            <div className="clay-card p-10 flex flex-col items-center text-center gap-4">
+              <div className="w-[80px] h-[80px] rounded-2xl bg-white shadow-xs border border-stone-200/80 p-1.5 flex items-center justify-center">
+                <img
+                  src="/logo.png"
+                  alt="KarigaarAI"
+                  className="w-full h-full object-contain"
+                  onError={(e) => {
+                    e.currentTarget.onerror = null
+                    e.currentTarget.src = '/favicon_new.png'
+                  }}
+                />
+              </div>
+              <div>
+                <h3 className="text-base font-semibold text-ink mb-1">
+                  {t('dashboard.empty_title', "No products yet")}
                 </h3>
-                <p className="text-sm text-clay-muted">
-                  {t('dashboard.empty_sub', 'Tap + to photograph and publish your first handcrafted craft product with AI.')}
+                <p className="text-sm text-ink-muted max-w-xs">
+                  {t('dashboard.empty_sub', 'Take a photo to add your first handcrafted product.')}
                 </p>
               </div>
-
               <ClayButton
                 variant="primary"
-                size="lg"
-                onClick={() => navigate('/catalog')}
-                icon={<Plus size={22} weight="bold" />}
-                className="mt-2 shadow-lg"
+                size="md"
+                onClick={() => {
+                  useCatalogStore.getState().reset()
+                  navigate('/catalog?new=true')
+                }}
+                icon={<Plus size={18} weight="bold" />}
               >
-                {t('add_new_product', 'Add Your First Product')}
+                {t('add_new_product', 'Add your first product')}
               </ClayButton>
-            </ClayCard>
-          ) : (
-            /* Listings Grid (1 col on mobile, 2 col on desktop) */
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-              {listings.map((item) => (
+            </div>
+          )}
+
+          {/* Product list (first 4 items) */}
+          {!loading && listings.length > 0 && (
+            <div className="flex flex-col gap-3">
+              {listings.slice(0, 4).map((item) => (
                 <ListingMiniCard
                   key={item.id}
                   listing={item}
@@ -329,35 +406,161 @@ export default function InventoryDashboard() {
             </div>
           )}
         </section>
+
+        {/* ── 4. Buyer Opportunities Section ─────────────────────────────── */}
+        {!loading && opportunities.length > 0 && (
+          <section className="scroll-mt-24">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h2 className="text-base font-semibold text-ink">
+                  {t('screen.market_opportunities', 'Buyer Opportunities')}
+                </h2>
+                <p className="text-xs text-ink-muted">
+                  {opportunities.length} {t('opportunities.verified_buyers_desc', 'verified commercial buyers looking for handcrafted items')}
+                </p>
+              </div>
+
+              <Link
+                to="/artisan/opportunities"
+                className="text-xs text-amber-acc hover:text-amber-900 font-medium flex items-center gap-1 hover:underline"
+              >
+                <span>{t('view_all_opportunities', 'View all opportunities')}</span>
+                <ArrowRight size={13} />
+              </Link>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {previewOpportunities.map((opp) => (
+                <div
+                  key={opp.buyer_id}
+                  className="clay-card p-4 flex flex-col justify-between gap-3 bg-white hover:border-stone-400/60 transition-colors"
+                >
+                  <div>
+                    <div className="flex items-start justify-between gap-2 mb-1.5">
+                      <span className="clay-badge clay-badge-neutral text-[9px]">
+                        {opp.buyer_type || 'Retailer'}
+                      </span>
+                      {opp.region_preferences && (
+                        <span className="text-[10px] text-ink-faint">
+                          📍 {Array.isArray(opp.region_preferences) ? opp.region_preferences[0] : opp.region_preferences}
+                        </span>
+                      )}
+                    </div>
+
+                    <h3 className="text-sm font-semibold text-ink line-clamp-1 mb-1">
+                      {opp.display_name || opp.buyer_name}
+                    </h3>
+
+                    <p className="text-xs text-ink-soft line-clamp-2 mb-2 leading-relaxed">
+                      {opp.description}
+                    </p>
+
+                    <div className="bg-stone-50 p-2 rounded border border-stone-200 text-[11px] space-y-1">
+                      <div className="flex justify-between text-ink-muted">
+                        <span>{t('opportunities.quantity_needed', 'Quantity')}:</span>
+                        <strong className="text-ink">{opp.quantity_min || opp.min_quantity}–{opp.quantity_max || opp.max_quantity} {t('opportunities.units_needed', 'pcs')}</strong>
+                      </div>
+                      <div className="flex justify-between text-ink-muted">
+                        <span>{t('opportunities.budget_range', 'Budget')}:</span>
+                        <strong className="text-forest">₹{opp.budget_min}–₹{opp.budget_max}</strong>
+                      </div>
+                    </div>
+
+                    <p className="text-[10px] text-amber-900 bg-amber-soft/60 p-1.5 rounded mt-2">
+                      ✨ {opp.match_reason || t('opportunities.matches_workshop', 'Matches your terracotta & craft specialty.')}
+                    </p>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => handleOpenProposal(opp)}
+                    className="clay-btn clay-btn-primary w-full flex items-center justify-center gap-1 text-xs py-1.5"
+                  >
+                    <span>{t('opportunities.send_proposal', 'Send Proposal')}</span>
+                    <PaperPlaneTilt size={13} weight="bold" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* ── 5. Passport / Business Identity Credibility ─────────────────── */}
+        <section className="clay-card p-6 bg-stone-900 text-stone-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+          <div className="flex items-start gap-4">
+            <div className="w-12 h-12 rounded bg-white/10 flex items-center justify-center text-amber-400 shrink-0">
+              <IdentificationBadge size={26} weight="fill" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-[10px] uppercase tracking-wider text-amber-400 font-bold bg-white/10 px-2 py-0.5 rounded">
+                  {t('passport.official_id', 'Official Artisan Passport')}
+                </span>
+                <span className="font-mono text-xs text-stone-300">
+                  KG-2024-8921
+                </span>
+              </div>
+              <h3 className="text-base font-semibold text-white">
+                {DEMO_ARTISAN.name} · {DEMO_ARTISAN.craftTitle}
+              </h3>
+              <p className="text-xs text-stone-300 mt-1 max-w-lg leading-relaxed">
+                {t('passport.intro_desc', 'Your digital identity establishes verifiable provenance and GI craft authenticity for institutional buyers and global collectors.')}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2.5 shrink-0 self-end sm:self-center">
+            <button
+              type="button"
+              onClick={() => navigate('/passport/KG-2024-8921')}
+              className="px-4 py-2 rounded bg-white text-stone-900 text-xs font-semibold hover:bg-stone-100 transition-colors cursor-pointer"
+            >
+              {t('passport.view_full', 'View Passport')}
+            </button>
+          </div>
+        </section>
+
       </main>
 
-      {/* Floating Action Button (Fixed bottom right) */}
+      {/* Proposal Modal */}
+      {activeOpportunity && (
+        <ProposalModal
+          isOpen={Boolean(activeOpportunity)}
+          onClose={() => setActiveOpportunity(null)}
+          opportunity={activeOpportunity}
+          product={selectedProductForProposal}
+          onSuccess={() => {
+            showToast(t('proposal.sent_success', 'Proposal sent successfully!'))
+          }}
+        />
+      )}
+
+      {/* Floating Add (Mobile) */}
       <motion.button
         type="button"
-        whileHover={{ scale: 1.08 }}
-        whileTap={{ scale: 0.92 }}
-        onClick={() => navigate('/catalog')}
-        aria-label="Add new product"
-        className="fixed bottom-6 right-6 z-40 w-16 h-16 rounded-full bg-gradient-to-tr from-[#df7829] to-[#f29649] text-white shadow-2xl flex items-center justify-center border-2 border-white/60 hover:shadow-orange-500/50 cursor-pointer"
+        whileHover={{ scale: 1.04 }}
+        whileTap={{ scale: 0.96 }}
+        onClick={() => {
+          useCatalogStore.getState().reset()
+          navigate('/catalog?new=true')
+        }}
+        aria-label={t('add_new_product')}
+        className="fixed bottom-20 right-5 z-40 w-12 h-12 rounded-full bg-ink text-white flex items-center justify-center shadow-editorial-lg border border-ink-soft sm:hidden"
       >
-        <Plus size={32} weight="bold" />
+        <Plus size={22} weight="bold" />
       </motion.button>
 
-      {/* Toast Notification */}
+      {/* Toast */}
       <AnimatePresence>
         {toastMessage && (
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 20 }}
-            className="fixed bottom-24 sm:bottom-8 left-1/2 -translate-x-1/2 z-50 px-5 py-3 rounded-2xl bg-slate-900/90 text-white shadow-2xl backdrop-blur-md flex items-center gap-3 border border-emerald-500/30"
+            exit={{ opacity: 0, y: 10 }}
+            className="toast"
           >
-            <div className="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
-              <Check size={16} weight="bold" />
-            </div>
-            <span className="text-xs sm:text-sm font-medium font-sans">
-              {toastMessage}
-            </span>
+            <Check size={14} weight="bold" className="text-forest shrink-0" />
+            <span>{toastMessage}</span>
           </motion.div>
         )}
       </AnimatePresence>

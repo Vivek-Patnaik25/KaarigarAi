@@ -15,6 +15,7 @@ import {
   FileText
 } from '@phosphor-icons/react'
 import { useLanguageStore, SUPPORTED_LANGUAGES } from '../store/languageStore'
+import { useCatalogStore } from '../store/catalogStore'
 import ClayCard from '../components/ClayCard'
 import ClayButton from '../components/ClayButton'
 import ClayBadge from '../components/ClayBadge'
@@ -75,7 +76,7 @@ export default function DashboardPage() {
         <aside className="hidden lg:flex flex-col justify-between w-60 shrink-0">
           <ClayCard className="p-5 flex flex-col gap-2">
             <span className="text-xs font-black uppercase tracking-wider text-clay-muted mb-1">
-              मेनू / Menu
+              {t('screen.menu')}
             </span>
 
             <button
@@ -88,7 +89,10 @@ export default function DashboardPage() {
 
             <button
               type="button"
-              onClick={() => navigate('/catalog')}
+              onClick={() => {
+                useCatalogStore.getState().reset()
+                navigate('/catalog?new=true')
+              }}
               className="px-4 py-3 rounded-2xl hover:bg-clay-deep text-clay-indigo font-heading font-bold text-sm flex items-center gap-3 transition-colors"
             >
               <PlusCircle size={20} weight="bold" />
@@ -123,7 +127,7 @@ export default function DashboardPage() {
             <div className="flex items-center gap-2">
               <span className="text-xl">{currentLang.flag}</span>
               <div className="flex flex-col">
-                <span className="text-xs font-bold text-clay-muted">भाषा / Language</span>
+                <span className="text-xs font-bold text-clay-muted">{t('choose_language')}</span>
                 <span className="text-sm font-black text-clay-indigo">{currentLang.native}</span>
               </div>
             </div>
@@ -132,7 +136,7 @@ export default function DashboardPage() {
               onClick={() => navigate('/language-select')}
               className="text-xs text-clay-primary font-bold hover:underline"
             >
-              बदलें
+              {t('screen.change')}
             </button>
           </ClayCard>
         </aside>
@@ -155,7 +159,7 @@ export default function DashboardPage() {
                   <div className="flex items-center gap-2 mb-2 text-white/90">
                     <Sparkle weight="fill" size={20} className="text-amber-200" />
                     <span className="text-sm font-bold uppercase tracking-wider">
-                      कारीगर डिजिटल केंद्र
+                      {t('screen.digital_center')}
                     </span>
                   </div>
                   <h1 className="text-2xl sm:text-4xl font-black text-white font-heading leading-tight">
@@ -171,9 +175,9 @@ export default function DashboardPage() {
                   <TrendUp size={28} className="text-amber-200 shrink-0" />
                   <div>
                     <span className="text-xs text-white/80 uppercase font-bold block">
-                      कुल दृश्य (Views)
+                      {t('screen.views')}
                     </span>
-                    <span className="text-lg font-black text-white">1,240 कारीगरी दर्शक</span>
+                    <span className="text-lg font-black text-white">1,240 {t('screen.craft_viewers')}</span>
                   </div>
                 </div>
               </div>
@@ -185,11 +189,14 @@ export default function DashboardPage() {
             <ClayButton
               variant="primary"
               size="lg"
-              onClick={() => navigate('/catalog')}
+              onClick={() => {
+                useCatalogStore.getState().reset()
+                navigate('/catalog?new=true')
+              }}
               icon={<PlusCircle weight="fill" size={28} />}
               className="w-full sm:w-auto px-10 py-5 text-xl shadow-2xl hover:scale-[1.02] transform transition-transform"
             >
-              {t('add_new_product')} (New Listing)
+              {t('add_new_product')}
             </ClayButton>
           </div>
 
@@ -200,7 +207,7 @@ export default function DashboardPage() {
                 {t('recent_listings')}
               </h2>
               <ClayBadge variant="indigo" className="hidden sm:inline-flex">
-                4 सक्रिय उत्पाद
+                4 {t('screen.active_products')}
               </ClayBadge>
             </div>
 
@@ -255,7 +262,7 @@ export default function DashboardPage() {
                             type="button"
                             onClick={() => navigate(`/listing/${item.id}/wholesale`)}
                             className="p-2.5 rounded-xl bg-clay-surface hover:bg-clay-deep text-orange-600 shadow-sm border border-white/50 transition-colors"
-                            title="B2B Wholesale Sheet"
+                            title={t('screen.b2b_wholesale_sheet')}
                           >
                             <FileText size={18} weight="bold" />
                           </button>

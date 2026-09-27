@@ -7,8 +7,10 @@ logger = logging.getLogger("SeedBuyers")
 DEMO_BUYER_REQUIREMENTS: List[Dict[str, Any]] = [
     # --- POTTERY & TERRACOTTA ---
     {
-        "buyer_id": "DEMO-BUYER-001",
-        "display_name": "Demo Heritage Boutique",
+        "buyer_id": "BUYER-MUM-PRM-001",
+        "buyer_name": "Ananya Sharma",
+        "organization_name": "Parampara Heritage Retail",
+        "display_name": "Parampara Heritage Retail",
         "buyer_type": "Boutique / Retailer",
         "categories": ["pottery_terracotta"],
         "budget_min": 1500,
@@ -23,8 +25,10 @@ DEMO_BUYER_REQUIREMENTS: List[Dict[str, Any]] = [
         "status": "active",
     },
     {
-        "buyer_id": "DEMO-BUYER-002",
-        "display_name": "Sample Organic Cafe Collective",
+        "buyer_id": "BUYER-BLR-SYA-002",
+        "buyer_name": "Vikramaditya Nair",
+        "organization_name": "Shunya Organics & Cafe",
+        "display_name": "Shunya Organics & Cafe",
         "buyer_type": "Hospitality Buyer",
         "categories": ["pottery_terracotta"],
         "budget_min": 200,
@@ -39,8 +43,10 @@ DEMO_BUYER_REQUIREMENTS: List[Dict[str, Any]] = [
         "status": "active",
     },
     {
-        "buyer_id": "DEMO-BUYER-003",
-        "display_name": "Demo Luxury Home Decor Retailer",
+        "buyer_id": "BUYER-DEL-MVD-003",
+        "buyer_name": "Ritu Dalmia",
+        "organization_name": "Mridang Home & Living",
+        "display_name": "Mridang Home & Living",
         "buyer_type": "Home Decor Buyer",
         "categories": ["pottery_terracotta", "painting_folk"],
         "budget_min": 1200,
@@ -57,8 +63,10 @@ DEMO_BUYER_REQUIREMENTS: List[Dict[str, Any]] = [
 
     # --- TEXTILE HANDLOOM ---
     {
-        "buyer_id": "DEMO-BUYER-004",
-        "display_name": "Demo Ethnic Apparel Retailer",
+        "buyer_id": "BUYER-HYD-SVK-004",
+        "buyer_name": "Sunita Reddy",
+        "organization_name": "Sattva Ethnic Weaves",
+        "display_name": "Sattva Ethnic Weaves",
         "buyer_type": "Boutique / Retailer",
         "categories": ["textile_handloom"],
         "budget_min": 1800,
@@ -73,8 +81,10 @@ DEMO_BUYER_REQUIREMENTS: List[Dict[str, Any]] = [
         "status": "active",
     },
     {
-        "buyer_id": "DEMO-BUYER-005",
-        "display_name": "Sample Sustainable Fashion House",
+        "buyer_id": "BUYER-MUM-VYA-005",
+        "buyer_name": "Arjun Kapoor",
+        "organization_name": "Vayu Sustainable Fashion Exporters",
+        "display_name": "Vayu Sustainable Fashion Exporters",
         "buyer_type": "Exporter",
         "categories": ["textile_handloom", "textile_embroidery"],
         "budget_min": 2500,
@@ -89,8 +99,10 @@ DEMO_BUYER_REQUIREMENTS: List[Dict[str, Any]] = [
         "status": "active",
     },
     {
-        "buyer_id": "DEMO-BUYER-006",
-        "display_name": "Demo Hospitality Linen Procurement",
+        "buyer_id": "BUYER-BLR-LST-006",
+        "buyer_name": "Priya Chandrasekhar",
+        "organization_name": "Loom & Stone Hospitality Linens",
+        "display_name": "Loom & Stone Hospitality Linens",
         "buyer_type": "Hospitality Buyer",
         "categories": ["textile_handloom"],
         "budget_min": 800,
@@ -107,8 +119,10 @@ DEMO_BUYER_REQUIREMENTS: List[Dict[str, Any]] = [
 
     # --- TEXTILE EMBROIDERY ---
     {
-        "buyer_id": "DEMO-BUYER-007",
-        "display_name": "Demo Artisan Bridal Couture",
+        "buyer_id": "BUYER-LKO-RVA-007",
+        "buyer_name": "Zoya Siddiqui",
+        "organization_name": "Rivayat Bridal Couture",
+        "display_name": "Rivayat Bridal Couture",
         "buyer_type": "Boutique / Retailer",
         "categories": ["textile_embroidery"],
         "budget_min": 3500,
@@ -123,8 +137,10 @@ DEMO_BUYER_REQUIREMENTS: List[Dict[str, Any]] = [
         "status": "active",
     },
     {
-        "buyer_id": "DEMO-BUYER-008",
-        "display_name": "Sample Cultural Souvenir Brand",
+        "buyer_id": "BUYER-KOL-KMT-008",
+        "buyer_name": "Debasree Roy",
+        "organization_name": "Kolkata Motifs Souvenirs",
+        "display_name": "Kolkata Motifs Souvenirs",
         "buyer_type": "Handicraft Store",
         "categories": ["textile_embroidery", "basketry_bamboo"],
         "budget_min": 450,
@@ -141,8 +157,10 @@ DEMO_BUYER_REQUIREMENTS: List[Dict[str, Any]] = [
 
     # --- WOODCRAFT ---
     {
-        "buyer_id": "DEMO-BUYER-009",
-        "display_name": "Demo Nordic Heritage Living",
+        "buyer_id": "BUYER-DEL-KAS-009",
+        "buyer_name": "Kabir Mehta",
+        "organization_name": "Kastha Woodcraft & Living",
+        "display_name": "Kastha Woodcraft & Living",
         "buyer_type": "Home Decor Buyer",
         "categories": ["woodcraft"],
         "budget_min": 750,
@@ -157,8 +175,10 @@ DEMO_BUYER_REQUIREMENTS: List[Dict[str, Any]] = [
         "status": "active",
     },
     {
-        "buyer_id": "DEMO-BUYER-010",
-        "display_name": "Sample Montessori Toy Distributor",
+        "buyer_id": "BUYER-MAA-AAR-010",
+        "buyer_name": "Lakshmi Sundaram",
+        "organization_name": "Aaroh Wooden Toys & Learning",
+        "display_name": "Aaroh Wooden Toys & Learning",
         "buyer_type": "Institutional Procurement",
         "categories": ["woodcraft"],
         "budget_min": 250,
@@ -173,8 +193,10 @@ DEMO_BUYER_REQUIREMENTS: List[Dict[str, Any]] = [
         "status": "active",
     },
     {
-        "buyer_id": "DEMO-BUYER-011",
-        "display_name": "Demo High-End Architectural Studio",
+        "buyer_id": "BUYER-MUM-VAR-011",
+        "buyer_name": "Varun Malhotra",
+        "organization_name": "Vastu Design & Architectural Studio",
+        "display_name": "Vastu Design & Architectural Studio",
         "buyer_type": "Home Decor Buyer",
         "categories": ["woodcraft", "metalcraft"],
         "budget_min": 4000,
@@ -191,8 +213,10 @@ DEMO_BUYER_REQUIREMENTS: List[Dict[str, Any]] = [
 
     # --- METALCRAFT ---
     {
-        "buyer_id": "DEMO-BUYER-012",
-        "display_name": "Demo Sovereign Temple Art",
+        "buyer_id": "BUYER-BHO-GTM-012",
+        "buyer_name": "Dr. S. K. Mahapatra",
+        "organization_name": "Gautam Heritage Trust & Museum",
+        "display_name": "Gautam Heritage Trust & Museum",
         "buyer_type": "Cultural Institution",
         "categories": ["metalcraft"],
         "budget_min": 1500,
@@ -207,8 +231,10 @@ DEMO_BUYER_REQUIREMENTS: List[Dict[str, Any]] = [
         "status": "active",
     },
     {
-        "buyer_id": "DEMO-BUYER-013",
-        "display_name": "Sample Corporate Gifting Buyer",
+        "buyer_id": "BUYER-GUG-ENT-013",
+        "buyer_name": "Meera Deshmukh",
+        "organization_name": "Enterprise Elegance Gifting",
+        "display_name": "Enterprise Elegance Gifting",
         "buyer_type": "Corporate Gifting",
         "categories": ["metalcraft", "woodcraft"],
         "budget_min": 600,
@@ -225,8 +251,10 @@ DEMO_BUYER_REQUIREMENTS: List[Dict[str, Any]] = [
 
     # --- JEWELLERY ---
     {
-        "buyer_id": "DEMO-BUYER-014",
-        "display_name": "Demo Bohemian Silver Gallery",
+        "buyer_id": "BUYER-BBU-RUP-014",
+        "buyer_name": "Rajeshwari Patnaik",
+        "organization_name": "Rupa Silver Filigree Gallery",
+        "display_name": "Rupa Silver Filigree Gallery",
         "buyer_type": "Boutique / Retailer",
         "categories": ["jewellery"],
         "budget_min": 500,
@@ -241,8 +269,10 @@ DEMO_BUYER_REQUIREMENTS: List[Dict[str, Any]] = [
         "status": "active",
     },
     {
-        "buyer_id": "DEMO-BUYER-015",
-        "display_name": "Sample Sustainable Accessories Brand",
+        "buyer_id": "BUYER-AMD-ECO-015",
+        "buyer_name": "Siddharth Shah",
+        "organization_name": "EcoWear Jewellery Exporters",
+        "display_name": "EcoWear Jewellery Exporters",
         "buyer_type": "Exporter",
         "categories": ["jewellery", "basketry_bamboo"],
         "budget_min": 250,
@@ -259,8 +289,10 @@ DEMO_BUYER_REQUIREMENTS: List[Dict[str, Any]] = [
 
     # --- BASKETRY & BAMBOO ---
     {
-        "buyer_id": "DEMO-BUYER-016",
-        "display_name": "Demo Eco-Living Organics",
+        "buyer_id": "BUYER-GAU-PRK-016",
+        "buyer_name": "Biren Kalita",
+        "organization_name": "Prakriti Cane & Bamboo Crafts",
+        "display_name": "Prakriti Cane & Bamboo Crafts",
         "buyer_type": "Handicraft Store",
         "categories": ["basketry_bamboo"],
         "budget_min": 300,
@@ -275,8 +307,10 @@ DEMO_BUYER_REQUIREMENTS: List[Dict[str, Any]] = [
         "status": "active",
     },
     {
-        "buyer_id": "DEMO-BUYER-017",
-        "display_name": "Sample Hospitality Lighting Specifier",
+        "buyer_id": "BUYER-BLR-LUM-017",
+        "buyer_name": "Neha Joshi",
+        "organization_name": "Lumina Hospitality Lighting Solutions",
+        "display_name": "Lumina Hospitality Lighting Solutions",
         "buyer_type": "Hospitality Buyer",
         "categories": ["basketry_bamboo", "woodcraft"],
         "budget_min": 900,
@@ -293,8 +327,10 @@ DEMO_BUYER_REQUIREMENTS: List[Dict[str, Any]] = [
 
     # --- PAINTING & FOLK ART ---
     {
-        "buyer_id": "DEMO-BUYER-018",
-        "display_name": "Demo National Art & Heritage Foundation",
+        "buyer_id": "BUYER-DEL-SKS-018",
+        "buyer_name": "Dr. Arindam Sen",
+        "organization_name": "Sanskriti Kala Akademi Foundation",
+        "display_name": "Sanskriti Kala Akademi Foundation",
         "buyer_type": "Cultural Institution",
         "categories": ["painting_folk"],
         "budget_min": 1500,
@@ -309,8 +345,10 @@ DEMO_BUYER_REQUIREMENTS: List[Dict[str, Any]] = [
         "status": "active",
     },
     {
-        "buyer_id": "DEMO-BUYER-019",
-        "display_name": "Sample Modern Folk Art Gallery",
+        "buyer_id": "BUYER-HYD-KAL-019",
+        "buyer_name": "Madhuri Varma",
+        "organization_name": "KalaKriti Modern Folk Art Gallery",
+        "display_name": "KalaKriti Modern Folk Art Gallery",
         "buyer_type": "Home Decor Buyer",
         "categories": ["painting_folk", "woodcraft"],
         "budget_min": 800,
@@ -327,8 +365,10 @@ DEMO_BUYER_REQUIREMENTS: List[Dict[str, Any]] = [
 
     # --- MULTI-CATEGORY EXPORT & INSTITUTIONAL ---
     {
-        "buyer_id": "DEMO-BUYER-020",
-        "display_name": "Demo Global Indian Craft Export House",
+        "buyer_id": "BUYER-MUM-IND-020",
+        "buyer_name": "Anand Singhania",
+        "organization_name": "Indus Craft Exporters India Ltd.",
+        "display_name": "Indus Craft Exporters India Ltd.",
         "buyer_type": "Exporter",
         "categories": ["textile_handloom", "metalcraft", "woodcraft", "pottery_terracotta"],
         "budget_min": 1000,
@@ -343,8 +383,10 @@ DEMO_BUYER_REQUIREMENTS: List[Dict[str, Any]] = [
         "status": "active",
     },
     {
-        "buyer_id": "DEMO-BUYER-021",
-        "display_name": "Sample State Emporium Network",
+        "buyer_id": "BUYER-DEL-GKV-021",
+        "buyer_name": "Ramesh Chand",
+        "organization_name": "Gramin Kala Vikas State Emporia Network",
+        "display_name": "Gramin Kala Vikas State Emporia Network",
         "buyer_type": "Institutional Procurement",
         "categories": ["textile_handloom", "textile_embroidery", "jewellery", "painting_folk"],
         "budget_min": 600,
@@ -359,8 +401,10 @@ DEMO_BUYER_REQUIREMENTS: List[Dict[str, Any]] = [
         "status": "active",
     },
     {
-        "buyer_id": "DEMO-BUYER-022",
-        "display_name": "Demo Festive Gifting Solutions",
+        "buyer_id": "BUYER-PUN-UTS-022",
+        "buyer_name": "Neeraja Kulkarni",
+        "organization_name": "Utsav Festive Gifting Solutions",
+        "display_name": "Utsav Festive Gifting Solutions",
         "buyer_type": "Corporate Gifting",
         "categories": ["pottery_terracotta", "jewellery", "basketry_bamboo"],
         "budget_min": 300,
@@ -375,8 +419,10 @@ DEMO_BUYER_REQUIREMENTS: List[Dict[str, Any]] = [
         "status": "active",
     },
     {
-        "buyer_id": "DEMO-BUYER-023",
-        "display_name": "Sample Heritage Hotel Collection",
+        "buyer_id": "BUYER-JAI-RAA-023",
+        "buyer_name": "Maharani Gayatri Devi Trust",
+        "organization_name": "Raas Heritage Hotels & Resorts",
+        "display_name": "Raas Heritage Hotels & Resorts",
         "buyer_type": "Hospitality Buyer",
         "categories": ["painting_folk", "metalcraft", "textile_handloom"],
         "budget_min": 2000,
@@ -391,8 +437,10 @@ DEMO_BUYER_REQUIREMENTS: List[Dict[str, Any]] = [
         "status": "active",
     },
     {
-        "buyer_id": "DEMO-BUYER-024",
-        "display_name": "Demo Artisan Village Collective",
+        "buyer_id": "BUYER-COI-GRM-024",
+        "buyer_name": "K. Ramaswamy",
+        "organization_name": "Gramodyog Artisan Village Collective",
+        "display_name": "Gramodyog Artisan Village Collective",
         "buyer_type": "Handicraft Store",
         "categories": ["pottery_terracotta", "basketry_bamboo", "woodcraft"],
         "budget_min": 200,
@@ -407,8 +455,10 @@ DEMO_BUYER_REQUIREMENTS: List[Dict[str, Any]] = [
         "status": "active",
     },
     {
-        "buyer_id": "DEMO-BUYER-025",
-        "display_name": "Sample Ethical Fashion Studio",
+        "buyer_id": "BUYER-BLR-BAN-025",
+        "buyer_name": "Maya Rao",
+        "organization_name": "Banjara Nomadic Studio",
+        "display_name": "Banjara Nomadic Studio",
         "buyer_type": "Boutique / Retailer",
         "categories": ["textile_embroidery", "jewellery"],
         "budget_min": 1200,

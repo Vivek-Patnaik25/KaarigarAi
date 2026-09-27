@@ -25,13 +25,13 @@ export const MOCK_PROCESS_RESPONSE = {
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000',
-  timeout: 45000, // 45s for AI models
+  timeout: 90000, // 90s: image pipeline (~20s) + LLM hard cap (13s) + buffer
 })
 
 api.interceptors.response.use(
   res => res.data,
   err => {
-    const message = err.response?.data?.message || err.response?.data?.detail || err.message || 'कुछ गलत हो गया। फिर कोशिश करें।'
+    const message = err.response?.data?.message || err.response?.data?.detail || err.message || 'Request failed. Please try again.'
     return Promise.reject(new Error(message))
   }
 )
@@ -161,4 +161,38 @@ export const fetchProductInquiries = async (productId) => {
   return response?.data || response
 }
 
+// ==========================================
+// User & Artisan Profile Settings API
+// ==========================================
+
+export const fetchProfile = async (role, userId) => {
+  try {
+    const response = await api.get(`/profile/${role}/${userId}`)
+    return response?.data || response
+  } catch (err) {
+    console.warn('Backend fetchProfile unreachable, fallback to local', err)
+    return null
+  }
+}
+
+export const saveProfile = async (profileData) => {
+  try {
+    const response = await api.post('/profile/update', profileData)
+    return response?.data || response
+  } catch (err) {
+    console.warn('Backend saveProfile unreachable, saved locally', err)
+    return { success: true, profile: profileData }
+  }
+}
+
+export const uploadAvatar = async (file) => {
+  const form = new FormData()
+  form.append('file', file)
+  const response = await api.post('/profile/avatar/upload', form, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  })
+  return response?.data || response
+}
+
 export default api
+

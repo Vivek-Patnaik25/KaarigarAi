@@ -6,6 +6,7 @@ from typing import Optional
 from fastapi import APIRouter, File, UploadFile, Form, Body, Request, Query, HTTPException
 from app.core.config import settings
 from app.core.responses import ApiResponse
+from app.core.language import normalize_language
 from app.models.schemas import (
     GenerateListingRequest,
     PredictPriceRequest,
@@ -76,25 +77,26 @@ async def process_product(
             enhanced_image_url = f"{base_url}/temp/{clean_filename}"
 
         # 2. Voice / Text Transcription Pipeline
+        selected_language = normalize_language(language_hint)
         transcript = ""
-        detected_language = language_hint or "hi"
+        detected_language = selected_language
         language_confidence = 1.0
 
         if audio and audio.filename:
             audio_bytes = await audio.read()
             if len(audio_bytes) > 0:
-                audio_result = transcribe_audio(audio_bytes, language_hint=language_hint)
+                audio_result = transcribe_audio(audio_bytes, language_hint=selected_language)
                 transcript = audio_result["transcript"]
                 detected_language = audio_result["detected_language"]
                 language_confidence = audio_result["language_confidence"]
 
         if not transcript and text_description:
             transcript = text_description.strip()
-            detected_language = language_hint or "hi"
+            detected_language = selected_language
             language_confidence = 1.0
 
         if not transcript:
-            transcript = "पारंपरिक हस्तशिल्प उत्पाद, शुद्ध हाथ से निर्मित।"
+            transcript = "Handmade traditional craft product."
 
         # 3. ML Craft Category Classifier (Fine-Tuned CLIP ViT-B/32)
         category_result = classifier.classify_from_bytes(image_bytes, description=transcript)
@@ -111,7 +113,8 @@ async def process_product(
         # 5. LLM Multilingual Listing Generator (Groq / Gemini API)
         listing = generate_listing(
             transcript=transcript,
-            detected_language=detected_language,
+            # Output language is the canonical UI choice, never the detected transcript language.
+            detected_language=selected_language,
             category=category,
             price_suggested=price_result["price_suggested"],
         )
@@ -125,6 +128,7 @@ async def process_product(
             "image_quality_score": image_result["quality_score"],
             "transcript": transcript,
             "detected_language": detected_language,
+            "selected_language": selected_language,
             "language_confidence": language_confidence,
             "category": category,
             "category_confidence": category_confidence,
@@ -134,6 +138,9 @@ async def process_product(
             "price_reasoning": price_result["reasoning"],
             "listing": listing,
             "processing_time_seconds": total_elapsed,
+            # LLM metadata — tells frontend whether AI story was generated or local fallback used
+            "llm_used": listing.pop("_llm_used", "unknown"),
+            "llm_success": listing.pop("_llm_success", False),
         })
 
     except Exception as e:
@@ -171,7 +178,7 @@ async def transcribe(
 ):
     try:
         audio_bytes = await audio.read()
-        result = transcribe_audio(audio_bytes, language_hint=language_hint)
+        result = transcribe_audio(audio_bytes, language_hint=normalize_language(language_hint))
         return ApiResponse.ok(result)
     except Exception as e:
         logger.error(f"Audio transcription failed: {e}")
@@ -183,7 +190,7 @@ async def generate_listing_endpoint(payload: GenerateListingRequest):
     try:
         listing_data = generate_listing(
             transcript=payload.transcript,
-            detected_language=payload.language,
+            detected_language=normalize_language(payload.language),
             category=payload.category or "textile",
             price_suggested=payload.price_suggested or 1500,
         )

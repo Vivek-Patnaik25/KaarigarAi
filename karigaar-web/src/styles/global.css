@@ -2,56 +2,144 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ==========================================================================
+   KarigaarAI — Archive Editorial Design System
+   Stone + ink palette. Restrained. Multilingual-first. Craft-catalogue feel.
+   ========================================================================== */
+
+/* ── 1. CSS Custom Properties ─────────────────────────────────────────────── */
 :root {
-  --clay-bg: #FDF6EE;
-  --clay-surface: #F5EDE0;
-  --clay-deep: #EDD9C0;
-  --clay-primary: #E8873A;
-  --clay-primary-soft: #F5C49A;
-  --clay-indigo: #3D5A8A;
-  --clay-indigo-soft: #B8C8E8;
-  --clay-success: #6DBF8A;
-  --clay-error: #E87070;
-  --clay-text: #2D2420;
-  --clay-muted: #8C7B6E;
+  /* Background layers */
+  --bg:           #FAFAF8;
+  --surface-1:    #FFFFFF;
+  --surface-2:    #F5F5F4;
+
+  /* Text hierarchy */
+  --text-primary:   #1C1917;
+  --text-secondary: #44403C;
+  --text-muted:     #78716C;
+  --text-faint:     #A8A29E;
+
+  /* Structural Navy */
+  --navy:         #1B2E6B;
+  --navy-light:   #2A3F85;
+
+  /* Borders */
+  --border:       #E7E5E4;
+  --border-strong:#D6D3D1;
+
+  /* Accent & Primary CTA — Orange #E8762B */
+  --accent:       #E8762B;
+  --accent-hover: #D3671F;
+  --accent-soft:  #FFF3EB;
+
+  /* Price / money / success — Forest green */
+  --forest:       #15803D;
+  --forest-soft:  #DCFCE7;
+
+  /* Destructive */
+  --error:        #DC2626;
+  --error-soft:   #FEF2F2;
+
+  /* WhatsApp — only for actual WhatsApp actions */
+  --whatsapp:     #25D366;
+
+  /* Navbar */
+  --nav-bg:       #1B2E6B;
+  --nav-text:     #FFFFFF;
+  --nav-muted:    #CBD5E1;
+
+  /* Transitions */
+  --transition:   0.15s ease;
+
+  /* Legacy clay aliases — ensure old Tailwind classes still resolve */
+  --clay-bg:          #FAFAF8;
+  --clay-surface:     #FFFFFF;
+  --clay-deep:        #F5F5F4;
+  --clay-primary:     #E8762B;
+  --clay-primary-soft:#FFF3EB;
+  --clay-indigo:      #1B2E6B;
+  --clay-success:     #15803D;
+  --clay-error:       #DC2626;
+  --clay-text:        #1C1917;
+  --clay-muted:       #78716C;
+}
+
+/* ── 2. Base Reset & Body ─────────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  tab-size: 4;
 }
 
 body {
   margin: 0;
-  background-color: var(--clay-bg);
-  background-image: 
-    radial-gradient(circle at 15% 15%, rgba(232, 135, 58, 0.08) 0%, transparent 40%),
-    radial-gradient(circle at 85% 85%, rgba(61, 90, 138, 0.08) 0%, transparent 45%),
-    linear-gradient(135deg, #FDF6EE 0%, #F7ECDE 100%);
-  background-attachment: fixed;
-  color: var(--clay-text);
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  background-color: var(--bg);
+  color: var(--text-primary);
+  /* Multilingual-safe font stack */
+  font-family:
+    "Noto Sans",
+    "Noto Sans Devanagari",
+    "Noto Sans Bengali",
+    "Noto Sans Tamil",
+    "Noto Sans Oriya",
+    "Inter",
+    system-ui,
+    -apple-system,
+    sans-serif;
+  font-size: 15px;
+  line-height: 1.6;
   min-height: 100vh;
+  /* Clean warm white background */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
+/* ── 3. Headings ──────────────────────────────────────────────────────────── */
 h1, h2, h3, h4, h5, h6 {
-  font-family: 'Nunito', 'Noto Sans Devanagari', sans-serif;
-  font-weight: 700;
-  color: var(--clay-indigo);
+  font-family:
+    "Noto Sans",
+    "Noto Sans Devanagari",
+    "Noto Sans Bengali",
+    "Noto Sans Tamil",
+    "Noto Sans Oriya",
+    "Inter",
+    system-ui,
+    sans-serif;
+  font-weight: 600;
+  color: var(--navy);
+  line-height: 1.3;
+  margin: 0;
 }
 
-/* Custom scrollbars with clay aesthetic */
+/* ── 4. Scrollbars — restrained stone ────────────────────────────────────── */
 ::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
+  width: 6px;
+  height: 6px;
 }
-
 ::-webkit-scrollbar-track {
-  background: #F5EDE0;
-  border-radius: 8px;
+  background: var(--surface-1);
 }
-
 ::-webkit-scrollbar-thumb {
-  background: #E8873A;
-  border-radius: 8px;
-  border: 2px solid #F5EDE0;
+  background: var(--border-strong);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-faint);
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: #D4752A;
+/* ── 5. Selection ────────────────────────────────────────────────────────── */
+::selection {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+/* ── 6. Focus visible ────────────────────────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
 }

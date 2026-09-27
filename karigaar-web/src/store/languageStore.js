@@ -1,21 +1,16 @@
 import { create } from 'zustand'
 import i18n from '../config/i18n'
+import { getPersistedLanguage, LANGUAGE_STORAGE_KEY, normalizeLanguage, SUPPORTED_LANGUAGES } from '../config/language'
 
-export const SUPPORTED_LANGUAGES = [
-  { code: 'hi', native: 'हिन्दी', label: 'Hindi', flag: '🇮🇳' },
-  { code: 'en', native: 'English', label: 'English', flag: '🌐' },
-  { code: 'or', native: 'ଓଡ଼ିଆ', label: 'Odia', flag: '🇮🇳' },
-  { code: 'bn', native: 'বাংলা', label: 'Bengali', flag: '🇮🇳' },
-  { code: 'ta', native: 'தமிழ்', label: 'Tamil', flag: '🇮🇳' },
-  { code: 'mr', native: 'मराठी', label: 'Marathi', flag: '🇮🇳' },
-]
+export { SUPPORTED_LANGUAGES }
 
 export const useLanguageStore = create((set) => ({
-  language: localStorage.getItem('karigaar_lang') || 'hi',
+  language: getPersistedLanguage(),
   setLanguage: (langCode) => {
-    localStorage.setItem('karigaar_lang', langCode)
-    i18n.changeLanguage(langCode)
-    document.documentElement.lang = langCode
-    set({ language: langCode })
+    const language = normalizeLanguage(langCode)
+    localStorage.setItem(LANGUAGE_STORAGE_KEY, language)
+    i18n.changeLanguage(language)
+    document.documentElement.lang = language
+    set({ language })
   },
 }))

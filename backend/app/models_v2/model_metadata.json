@@ -1,0 +1,124 @@
+{
+  "clip_model_id": "openai/clip-vit-base-patch32",
+  "clip_categories": [
+    "basketry_bamboo",
+    "jewellery",
+    "metalcraft",
+    "painting_folk",
+    "pottery_terracotta",
+    "textile_embroidery",
+    "textile_handloom",
+    "woodcraft"
+  ],
+  "cat_to_idx": {
+    "basketry_bamboo": 0,
+    "jewellery": 1,
+    "metalcraft": 2,
+    "painting_folk": 3,
+    "pottery_terracotta": 4,
+    "textile_embroidery": 5,
+    "textile_handloom": 6,
+    "woodcraft": 7
+  },
+  "xgb_feature_layout": {
+    "tabular_8": [
+      "category_encoded",
+      "has_gi_tag",
+      "material_tier",
+      "technique_score",
+      "source_encoded",
+      "title_length",
+      "title_word_count",
+      "desc_len_norm"
+    ],
+    "multimodal_776": "tabular_8 + dinov2_768"
+  },
+  "category_price_floors": {
+    "basketry_bamboo": 237.6,
+    "jewellery": 348.0,
+    "pottery_terracotta": 300.0,
+    "metalcraft": 1068.0,
+    "textile_handloom": 1542.000000000001,
+    "textile_embroidery": 792.0,
+    "painting_folk": 1281.6,
+    "woodcraft": 483.52000000000004
+  },
+  "desc_len_mean": 646.1757109800702,
+  "desc_len_std": 307.5745055626785,
+  "source_classes": [
+    "GoSwadeshi",
+    "altrove.in",
+    "clartstudios.com",
+    "earthan.in",
+    "gulal.in",
+    "iTokri",
+    "jaipurbazar.in",
+    "jsphandlooms.com",
+    "khatkhathandloom.com",
+    "konthacrafts.com",
+    "muselot.in",
+    "rewahandloom.com",
+    "saugaatstation.com",
+    "shreehive.com",
+    "tribesofjaipur.com",
+    "wayofliving.co.in"
+  ],
+  "category_classes": [
+    "basketry_bamboo",
+    "jewellery",
+    "metalcraft",
+    "painting_folk",
+    "pottery_terracotta",
+    "textile_embroidery",
+    "textile_handloom",
+    "woodcraft"
+  ],
+  "training_rows": 26794,
+  "xgb_tabular_r2": 0.5710078347348247,
+  "xgb_tabular_mae_inr": 1334.1824601554301,
+  "xgb_tabular_w20pct": 46.442786069651746,
+  "clip_best_val_loss": 1.1616316368831463,
+  "clip_best_macro_f1": 0.6725313268909682,
+  "cat_model_results": {
+    "textile_handloom": {
+      "rows": 6429,
+      "r2": 0.554768374810273,
+      "low_data": false
+    },
+    "textile_embroidery": {
+      "rows": 1636,
+      "r2": 0.6272757189948677,
+      "low_data": false
+    },
+    "pottery_terracotta": {
+      "rows": 1114,
+      "r2": 0.6453035019181947,
+      "low_data": false
+    },
+    "woodcraft": {
+      "rows": 159,
+      "r2": 0.6728294344339381,
+      "low_data": true
+    },
+    "metalcraft": {
+      "rows": 43,
+      "r2": -0.5930097904975424,
+      "low_data": true
+    },
+    "jewellery": {
+      "rows": 7533,
+      "r2": 0.5224143882888138,
+      "low_data": false
+    },
+    "basketry_bamboo": {
+      "rows": 9591,
+      "r2": 0.7291321876945225,
+      "low_data": false
+    },
+    "painting_folk": {
+      "rows": 289,
+      "r2": 0.49055333022586245,
+      "low_data": true
+    }
+  }
+}

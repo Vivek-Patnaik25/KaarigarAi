@@ -1,10 +1,17 @@
+import sys
+from pathlib import Path
+sys.path.append(str(Path(__file__).parent.parent))
+
+from scripts.download_models import download_classifier
+download_classifier()
+
 import logging
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.db.mongodb import connect_to_mongo, close_mongo_connection, check_db_health
-from app.routers import ml_router, catalog_router, media_router, product_router, market_router
+from app.routers import ml_router, catalog_router, media_router, product_router, market_router, profile_router
 from app.ml.price_predictor import price_predictor
 from app.ml.classifier import classifier
 
@@ -59,12 +66,14 @@ app.include_router(catalog_router.router)
 app.include_router(media_router.router)
 app.include_router(product_router.router)
 app.include_router(market_router.router)
+app.include_router(profile_router.router)
 
 app.include_router(ml_router.router, prefix=settings.API_V1_STR)
 app.include_router(catalog_router.router, prefix=settings.API_V1_STR)
 app.include_router(media_router.router, prefix=settings.API_V1_STR)
 app.include_router(product_router.router, prefix=settings.API_V1_STR)
 app.include_router(market_router.router, prefix=settings.API_V1_STR)
+app.include_router(profile_router.router, prefix=settings.API_V1_STR)
 
 @app.get("/", tags=["Health"])
 async def root():

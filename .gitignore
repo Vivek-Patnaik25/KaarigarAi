@@ -86,6 +86,7 @@ Thumbs.db
 .agents/
 
 # ─── Large ML Models & Weights ───
-backend/app/ml/weights/*
-backend/app/models_v2/*
-backend/app/new_models/*
+*.zip
+backend/app/models_v2/craft_classifier_finetuned.pt
+backend/app/new_models/
+backend/app/ml/weights/

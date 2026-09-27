@@ -1,117 +1,94 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { motion } from 'framer-motion'
-import { Sparkle, ArrowRight } from '@phosphor-icons/react'
+import { ArrowRight, Check } from '@phosphor-icons/react'
 import { useLanguageStore, SUPPORTED_LANGUAGES } from '../store/languageStore'
-import ClayCard from '../components/ClayCard'
-import ClayButton from '../components/ClayButton'
+import { DEFAULT_LANGUAGE } from '../config/language'
 
 export default function LanguageSelectPage() {
   const navigate = useNavigate()
+  const { t } = useTranslation()
   const { language, setLanguage } = useLanguageStore()
-  const [selected, setSelected] = useState(language || 'hi')
+  const [selected, setSelected] = useState(language || DEFAULT_LANGUAGE)
 
   const handleContinue = () => {
     if (!selected) return
     setLanguage(selected)
-    navigate('/dashboard')
+    navigate('/dashboard', { replace: true })
   }
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center p-4 sm:p-8 bg-gradient-to-b from-[#FDF6EE] via-[#F8EFE3] to-[#F2E5D5]">
+    <div className="min-h-screen bg-stone-bg flex items-center justify-center p-4 sm:p-8">
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
-        className="w-full max-w-xl flex flex-col items-center text-center"
+        transition={{ duration: 0.3 }}
+        className="w-full max-w-md flex flex-col"
       >
-        {/* Top Logo */}
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-14 h-14 rounded-3xl bg-gradient-to-br from-clay-primary to-orange-600 flex items-center justify-center text-white shadow-xl shadow-clay-primary/30">
-            <span className="text-3xl font-black font-heading">क</span>
+        {/* Logo */}
+        <div className="flex items-center gap-2.5 mb-10">
+          <div
+            className="w-9 h-9 rounded flex items-center justify-center text-white text-sm font-semibold"
+            style={{ background: '#B45309' }}
+          >
+            क
           </div>
-          <span className="text-3xl sm:text-4xl font-black text-clay-indigo tracking-tight font-heading">
-            Karigaar<span className="text-clay-primary">AI</span>
+          <span className="text-ink text-lg font-semibold">
+            Karigaar<span className="text-amber-acc">AI</span>
           </span>
         </div>
 
-        {/* Illustrated SVG Line-art of Artisan Hands */}
-        <div className="my-2 p-3 text-clay-primary">
-          <svg
-            width="120"
-            height="70"
-            viewBox="0 0 120 70"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            className="drop-shadow-md mx-auto"
-          >
-            {/* Stylized Pottery Wheel and Artisan Hands Outline */}
-            <path
-              d="M15 50C25 35 40 30 50 35C55 38 58 45 60 48C62 45 65 38 70 35C80 30 95 35 105 50"
-              stroke="#E8873A"
-              strokeWidth="4"
-              strokeLinecap="round"
-            />
-            <path
-              d="M35 55C45 50 55 48 60 48C65 48 75 50 85 55"
-              stroke="#3D5A8A"
-              strokeWidth="3.5"
-              strokeLinecap="round"
-            />
-            <circle cx="60" cy="22" r="12" fill="#F5C49A" stroke="#E8873A" strokeWidth="3" />
-            <path
-              d="M20 58C35 64 85 64 100 58"
-              stroke="#8C7B6E"
-              strokeWidth="3"
-              strokeLinecap="round"
-            />
-          </svg>
-        </div>
-
-        {/* Bilingual Heading */}
-        <h1 className="text-3xl sm:text-4xl font-black text-clay-indigo font-heading mt-2">
-          अपनी भाषा चुनें
+        {/* Heading */}
+        <h1 className="text-2xl font-semibold text-ink mb-1">
+          {t('choose_language', 'Choose language')}
         </h1>
-        <p className="text-base sm:text-lg text-clay-muted font-medium mt-1 mb-8">
-          Choose Your Language / अपनी पसंदीदा भाषा चुनें
+        <p className="text-sm text-ink-muted mb-8">
+          {t('choose_language_sub', 'Select the language you are most comfortable with')}
         </p>
 
-        {/* Language Grid: 2 columns, 3 rows */}
-        <div className="grid grid-cols-2 gap-3.5 sm:gap-4 w-full mb-8">
+        {/* Language grid */}
+        <div className="grid grid-cols-2 gap-2.5 mb-8">
           {SUPPORTED_LANGUAGES.map((lang) => {
             const isSelected = selected === lang.code
             return (
-              <ClayCard
+              <button
                 key={lang.code}
-                variant={isSelected ? 'selected' : 'default'}
+                type="button"
                 onClick={() => setSelected(lang.code)}
-                className={`p-4 sm:p-5 flex flex-col items-center justify-center gap-1 cursor-pointer transition-all duration-200 ${
-                  isSelected ? 'border-clay-primary scale-[1.03]' : ''
+                className={`flex items-center gap-3 px-4 py-3.5 rounded border text-left transition-all ${
+                  isSelected
+                    ? 'border-amber-acc bg-amber-light'
+                    : 'border-stone-deep bg-white hover:border-stone-border hover:bg-stone-surface'
                 }`}
+                style={{ minHeight: '64px' }}
               >
-                <span className="text-2xl sm:text-3xl mb-1">{lang.flag}</span>
-                <span className="text-xl sm:text-2xl font-black text-clay-indigo font-heading leading-tight">
-                  {lang.native}
-                </span>
-                <span className="text-xs sm:text-sm text-clay-muted font-semibold tracking-wide">
-                  {lang.label}
-                </span>
-              </ClayCard>
+                <span className="text-2xl">{lang.flag}</span>
+                <div className="flex flex-col flex-1 min-w-0">
+                  <span className={`text-base font-medium leading-tight ${isSelected ? 'text-amber-acc' : 'text-ink'}`}>
+                    {lang.native}
+                  </span>
+                  <span className="text-xs text-ink-faint">{lang.label}</span>
+                </div>
+                {isSelected && (
+                  <Check size={15} weight="bold" className="text-amber-acc shrink-0" />
+                )}
+              </button>
             )
           })}
         </div>
 
-        {/* Continue Button */}
-        <ClayButton
-          variant="primary"
-          size="lg"
-          fullWidth
+        {/* Continue */}
+        <button
+          type="button"
           disabled={!selected}
           onClick={handleContinue}
-          icon={<ArrowRight weight="bold" size={22} />}
+          className="clay-btn clay-btn-primary w-full flex items-center justify-center gap-2"
+          style={{ minHeight: '50px', fontSize: '15px' }}
         >
-          Continue → आगे बढ़ें
-        </ClayButton>
+          {t('continue', 'Continue')}
+          <ArrowRight size={16} weight="bold" />
+        </button>
       </motion.div>
     </div>
   )

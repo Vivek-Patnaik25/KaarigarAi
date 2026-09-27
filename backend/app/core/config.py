@@ -31,9 +31,14 @@ class Settings(BaseSettings):
     # Speech-to-Text & LLM
     WHISPER_MODEL_SIZE: str = os.getenv("WHISPER_MODEL_SIZE", "small")
     GROQ_API_KEY: str = os.getenv("GROQ_API_KEY", "")
-    GROQ_MODEL: str = os.getenv("GROQ_MODEL", "openai/gpt-oss-20b")
+    GROQ_MODEL: str = os.getenv("GROQ_MODEL", "qwen/qwen3.8-27b")
+    GROQ_TIMEOUT_SECONDS: float = float(os.getenv("GROQ_TIMEOUT_SECONDS", "5"))
     GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "")
-    GEMINI_MODEL: str = os.getenv("GEMINI_MODEL", "gemini-1.5-flash")
+    GEMINI_MODEL: str = os.getenv("GEMINI_MODEL", "gemini-3.1-flash-lite")
+    GEMINI_TIMEOUT_SECONDS: float = float(os.getenv("GEMINI_TIMEOUT_SECONDS", "10"))
+    MISTRAL_KEY: str = os.getenv("MISTRAL_KEY", os.getenv("MISTRAL_API_KEY", ""))
+    MISTRAL_MODEL: str = os.getenv("MISTRAL_MODEL", "mistral-small-latest")
+    MISTRAL_TIMEOUT_SECONDS: float = float(os.getenv("MISTRAL_TIMEOUT_SECONDS", "6"))
 
     # Database (MongoDB Atlas)
     MONGODB_URI: str = os.getenv("MONGODB_URI", "")
@@ -41,6 +46,11 @@ class Settings(BaseSettings):
 
     # Frontend Public URL
     FRONTEND_PUBLIC_URL: str = os.getenv("FRONTEND_PUBLIC_URL", "http://localhost:5173")
+
+    # UltraMsg WhatsApp Configuration
+    ULTRAMSG_INSTANCE_ID: str = os.getenv("ULTRAMSG_INSTANCE_ID", "")
+    ULTRAMSG_TOKEN: str = os.getenv("ULTRAMSG_TOKEN", "")
+    DEMO_ARTISAN_PHONE: str = os.getenv("DEMO_ARTISAN_PHONE", "")
 
     # CORS
     ALLOWED_ORIGINS: List[str] = ["*"]
@@ -61,7 +71,6 @@ class Settings(BaseSettings):
         return v
 
     model_config = ConfigDict(
-        case_sensitive=True,
         extra="ignore"
     )
 

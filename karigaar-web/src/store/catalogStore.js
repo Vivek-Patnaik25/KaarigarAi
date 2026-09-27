@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { localizedField, normalizeLanguage } from '../config/language'
 
 const initialState = {
   currentStep: 1, // 1: Image, 2: Voice, 3: Processing, 4: Preview
@@ -9,17 +10,27 @@ const initialState = {
   audioBlob: null,
   audioUrl: null,
   transcript: '',
-  detectedLanguage: 'hi',
+  detectedLanguage: 'en',
   isProcessing: false,
   processingStage: 1, // 1 to 5
   processResponse: null,
-  
+
   // Listing details for Step 4 Preview / Editing
   title: '',
+  titleHi: '',
+  titleEn: '',
+  titleOr: '',
+  titleTa: '',
+  titleMr: '',
+  titleBn: '',
   description: '',
   descriptionHi: '',
   descriptionEn: '',
-  selectedDescLang: 'hi',
+  descriptionOr: '',
+  descriptionTa: '',
+  descriptionMr: '',
+  descriptionBn: '',
+  selectedDescLang: 'en',
   price: 0,
   priceMin: 0,
   priceMax: 0,
@@ -51,12 +62,24 @@ export const useCatalogStore = create((set) => ({
 
   setProcessing: (isProcessing, stage = 1) => set({ isProcessing, processingStage: stage }),
 
-  setProcessResponse: (data) => {
+  setProcessResponse: (data, activeLang = 'en') => {
     const listing = data.listing || {}
-    const title = listing.title_hi || listing.title_en || 'हस्तनिर्मित उत्पाद'
-    const descHi = listing.description_hi || ''
+    const titleEn = listing.title_en || ''
+    const titleHi = listing.title_hi || ''
+    const titleOr = listing.title_or || ''
+    const titleTa = listing.title_ta || ''
+    const titleMr = listing.title_mr || ''
+    const titleBn = listing.title_bn || ''
+
     const descEn = listing.description_en || ''
-    const defaultDesc = descHi || descEn
+    const descHi = listing.description_hi || ''
+    const descOr = listing.description_or || ''
+    const descTa = listing.description_ta || ''
+    const descMr = listing.description_mr || ''
+    const descBn = listing.description_bn || ''
+    const initialLang = normalizeLanguage(activeLang)
+    const activeTitle = localizedField(listing, 'title', initialLang) || 'Handcrafted Artisan Item'
+    const activeDesc = localizedField(listing, 'description', initialLang)
 
     set({
       processResponse: data,
@@ -68,10 +91,21 @@ export const useCatalogStore = create((set) => ({
       priceMin: data.price_min || Math.round((data.price_suggested || 1939) * 0.8),
       priceMax: data.price_max || Math.round((data.price_suggested || 1939) * 1.25),
       priceReasoning: data.price_reasoning || 'उचित मूल्य अनुमान',
-      title: title,
-      description: defaultDesc,
+      title: activeTitle,
+      titleHi,
+      titleEn,
+      titleOr,
+      titleTa,
+      titleMr,
+      titleBn,
+      description: activeDesc,
       descriptionHi: descHi,
       descriptionEn: descEn,
+      descriptionOr: descOr,
+      descriptionTa: descTa,
+      descriptionMr: descMr,
+      descriptionBn: descBn,
+      selectedDescLang: initialLang,
       tags: listing.seo_tags && listing.seo_tags.length > 0 ? [...listing.seo_tags] : ['handmade', 'artisan'],
       isProcessing: false,
     })
@@ -87,10 +121,18 @@ export const useCatalogStore = create((set) => ({
   updateDescription: (description) => set({ description }),
 
   setSelectedDescLang: (lang) => set((state) => {
-    let desc = state.description
-    if (lang === 'hi' && state.descriptionHi) desc = state.descriptionHi
-    else if (lang === 'en' && state.descriptionEn) desc = state.descriptionEn
-    return { selectedDescLang: lang, description: desc }
+    const selectedDescLang = normalizeLanguage(lang)
+    const listing = {
+      title_en: state.titleEn, title_hi: state.titleHi, title_or: state.titleOr,
+      title_ta: state.titleTa, title_mr: state.titleMr, title_bn: state.titleBn,
+      description_en: state.descriptionEn, description_hi: state.descriptionHi,
+      description_or: state.descriptionOr, description_ta: state.descriptionTa, description_mr: state.descriptionMr, description_bn: state.descriptionBn,
+    }
+    return {
+      selectedDescLang,
+      title: localizedField(listing, 'title', selectedDescLang) || state.title,
+      description: localizedField(listing, 'description', selectedDescLang) || state.description,
+    }
   }),
 
   updatePrice: (price) => set({ price: Number(price) }),

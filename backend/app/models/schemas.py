@@ -41,8 +41,16 @@ class TranscribeResponse(BaseModel):
 class ListingData(BaseModel):
     title_en: str = ""
     title_hi: str = ""
+    title_ta: str = ""
+    title_mr: str = ""
+    title_or: str = ""
+    title_bn: str = ""
     description_en: str = ""
     description_hi: str = ""
+    description_ta: str = ""
+    description_mr: str = ""
+    description_or: str = ""
+    description_bn: str = ""
     description_regional: str = ""
     seo_tags: List[str] = Field(default_factory=list)
     craft_tradition: Optional[str] = None
@@ -58,8 +66,16 @@ class GenerateListingRequest(BaseModel):
 class GenerateListingResponse(BaseModel):
     title_en: str
     title_hi: str
+    title_ta: str = ""
+    title_mr: str = ""
+    title_or: str = ""
+    title_bn: str = ""
     description_en: str
     description_hi: str
+    description_ta: str = ""
+    description_mr: str = ""
+    description_or: str = ""
+    description_bn: str = ""
     description_regional: str
     seo_tags: List[str] = Field(default_factory=list)
     craft_tradition: Optional[str] = None
@@ -229,9 +245,23 @@ class MarketMatchResponse(BaseModel):
 class DemoInquiryRequest(BaseModel):
     product_id: str
     buyer_id: str
+    buyer_name: Optional[str] = None
+    product_title: Optional[str] = None
+    artisan_id: Optional[str] = None
+    artisan_name: Optional[str] = None
+    artisan_phone: Optional[str] = None
+    offered_unit_price: Optional[float] = None
+    proposed_quantity: Optional[int] = None
+    target_delivery_date: Optional[str] = None
+    lead_time_days: Optional[int] = None
+    artisan_notes: Optional[str] = None
+    buyer_notes: Optional[str] = None
     message: Optional[str] = None
     contact_name: Optional[str] = "Artisan"
     contact_phone: Optional[str] = "+91 98765 43210"
+    language: Optional[str] = "mr"
+    total_estimated: Optional[float] = None
+    demo_data: Optional[bool] = True
 
 class DemoInquiryResponse(BaseModel):
     success: bool
